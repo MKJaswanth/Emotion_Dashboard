@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mood Submission</title>
+  <style>
+    body { font-family: Arial; text-align: center; padding: 50px; }
+    button { padding: 10px 20px; font-size: 18px; margin: 10px; }
+  </style>
+</head>
+<body>
+
+  <h1>How are you feeling right now?</h1>
+
+  <!-- Mood Options -->
+  <div id="mood-buttons">
+    <button onclick="submitMood(1)">😞</button>
+    <button onclick="submitMood(2)">😐</button>
+    <button onclick="submitMood(3)">🙂</button>
+    <button onclick="submitMood(4)">😊</button>
+    <button onclick="submitMood(5)">😁</button>
+  </div>
+
+  <p id="status"></p>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
