@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Emotion Tracker</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .login-logo {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .login-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .login-subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .login-form {
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .login-button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .login-button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .divider {
+            margin: 30px 0;
+            display: flex;
+            align-items: center;
+            color: #666;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e1e5e9;
+        }
+        
+        .divider span {
+            padding: 0 15px;
+        }
+        
+        .google-button {
+            width: 100%;
+            padding: 14px;
+            background: white;
+            color: #333;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .google-button:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        .google-icon {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .demo-info {
+            background: #f8f9ff;
+            border: 1px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .demo-info strong {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-logo">😊</div>
+            <h1 class="login-title">Welcome Back</h1>
+            <p class="login-subtitle">Sign in to access your emotion tracker</p>
+            
+            <!-- Admin Login Form -->
+            <form class="login-form" id="admin-form">
+                <div class="form-group">
+                    <label class="form-label" for="username">Username</label>
+                    <input type="text" id="username" class="form-input" placeholder="Enter username" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <input type="password" id="password" class="form-input" placeholder="Enter password" required>
+                </div>
+                <button type="submit" class="login-button">Admin Login</button>
+            </form>
+            
+            <div class="divider">
+                <span>or</span>
+            </div>
+            
+            <!-- Google Login -->
+            <button class="google-button" id="google-login">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAxOCAxOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE3LjY0IDkuMjA0NTVDMTcuNjQgOC41NjY0IDE3LjU4MjcgNy45NTI3MyAxNy40NzI3IDcuMzYzNjRIMTlWMTBIMTcuNjRWOS4yMDQ1NVoiIGZpbGw9IiNGQjQwMjgiLz4KPHBhdGggZD0iTTkgMTcuNjRDMTAuNDc2NCAxNy42NCAxMS43NzI3IDE3LjE0NTUgMTIuNzI3MyAxNi4yNzI3TDE1LjQ1NDUgMTguMTgxOEMxNC4wMDkxIDE5LjQ5MDkgMTIuMDkwOSAyMC4yNCA5IDIwLjI0QzYuNjM2MzYgMjAuMjQgNC42MzYzNiAxOS4xNDU1IDMuMzE4MTggMTcuMzYzNkwxLjA5MDkxIDE5LjE4MThDMS42MzYzNiAyMC4wOTA5IDIuNDU0NTUgMjAuNzI3MyAzLjQ1NDU1IDIxLjE4MThDNC40NTQ1NSAyMS42MzY0IDUuNjM2MzYgMjEuODcyNyA2LjkwOTA5IDIxLjg3MjdDMTIuMDkwOSAyMS44NzI3IDE2LjE4MTggMTguNzI3MyAxNi4xODE4IDEzLjYzNjRIMTQuNzI3M0MxNC43MjczIDE2LjE4MTggMTIuNzI3MyAxNy42NCA5IDE3LjY0WiIgZmlsbD0iIzM0QTg1MyIvPgo8cGF0aCBkPSJNMy4zMTgxOCAxNy4zNjM2QzMuMDkwOTEgMTYuNzI3MyAyLjk1NDU1IDE2LjA5MDkgMi45NTQ1NSAxNS40NTQ1QzIuOTU0NTUgMTQuODE4MiAzLjA5MDkxIDE0LjE4MTggMy4zMTgxOCAxMy41NDU1VjExLjcyNzNIMC45MDkwOTFDMC4zMjcyNzMgMTMuMDkwOSAwIDE0LjYzNjQgMCAxNi4yNzI3QzAgMTcuOTA5MSAwLjMyNzI3MyAxOS40NTQ1IDAuOTA5MDkxIDIwLjgxODJMMy4zMTgxOCAxNy4zNjM2WiIgZmlsbD0iI0ZCQjAwRCIvPgo8cGF0aCBkPSJNOSAzLjI3MjczQzEwLjA5MDkgMy4yNzI3MyAxMS4wOTA5IDMuNjM2MzYgMTEuODE4MiA0LjM2MzY0TDEzLjgxODE4IDIuMzYzNjRDMTIuNzI3MyAxLjI3MjczIDExLjQ1NDUgMC42MzYzNjQgOS45MDkwOSAwLjYzNjM2NEM3LjU0NTQ1IDAuNjM2MzY0IDUuNTQ1NDUgMS43MzE4MiA0LjIyNzI3IDMuNTEzNjRMMi4wMDAwMSAxLjczMTgyQzIuNTQ1NDUgMC44MTgxODIgMy4zNjM2NCAwLjA5MDkwOSA0LjM2MzY0IC0wLjM2MzYzNkM1LjM2MzY0IC0wLjgxODE4MiA2LjU0NTQ1IC0xLjA1NDU1IDcuODE4MTggLTEuMDU0NTVDMTMuMDA5MSAtMS4wNTQ1NSAxNy4wOTA5IDIuMDkwOTEgMTcuMDkwOSA3LjE4MTgySDE1LjYzNjRDMTUuNjM2NCA0LjYzNjM2IDEzLjYzNjQgMy4xODE4MiAxMC45MDkwOSAzLjE4MTgySDlWMy4yNzI3M1oiIGZpbGw9IiNFQTQzMzUiLz4KPC9zdmc+" alt="Google" class="google-icon">
+                Continue with Google
+            </button>
+            
+            <div class="demo-info">
+                <strong>Admin Access:</strong><br>
+                Contact your administrator for credentials
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyC639yfUtTgHbCmnqUp_J7uZ3RrFUbR5PU",
+            authDomain: "emotion-dashboard-d31ca.firebaseapp.com",
+            databaseURL: "https://emotion-dashboard-d31ca-default-rtdb.firebaseio.com",
+            projectId: "emotion-dashboard-d31ca",
+            storageBucket: "emotion-dashboard-d31ca.firebasestorage.app",
+            messagingSenderId: "191620106192",
+            appId: "1:191620106192:web:68fe5b79d2ee42ecd71bd5",
+            measurementId: "G-6DJ6ZF946J"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // Admin credentials
+        const ADMIN_CREDENTIALS = {
+            username: 'admin',
+            password: 'admin123'
+        };
+
+        // Check if user is already logged in
+        auth.onAuthStateChanged(function(user) {
+            if (user) {
+                // User is signed in
+                localStorage.setItem('userRole', 'user');
+                localStorage.setItem('isLoggedIn', 'true');
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Admin login
+        document.getElementById('admin-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+                localStorage.setItem('userRole', 'admin');
+                localStorage.setItem('isLoggedIn', 'true');
+                window.location.href = 'index.html';
+            } else {
+                alert('Invalid admin credentials!');
+            }
+        });
+
+        // Google login
+        document.getElementById('google-login').addEventListener('click', function() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+                .then((result) => {
+                    localStorage.setItem('userRole', 'user');
+                    localStorage.setItem('isLoggedIn', 'true');
+                    window.location.href = 'index.html';
+                })
+                .catch((error) => {
+                    console.error('Google login error:', error);
+                    alert('Google login failed. Please try again.');
+                });
+        });
+    </script>
+</body>
+</html> 

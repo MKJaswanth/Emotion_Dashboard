@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Tracker - Your Daily Mood Companion</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">😊 MoodTracker</div>
+            <div class="nav-links">
+                <a href="#welcome">Home</a>
+                <a href="#mood-section">Mood</a>
+                <a href="#text-section">Share</a>
+                <a href="#quotes-section">Inspiration</a>
+                <a href="login.html" id="signin-link">Sign In</a>
+                <a href="dashboard.html" id="admin-link" style="display: none;">Admin Dashboard</a>
+                <a href="#" id="logout-btn" style="display: none;">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Welcome Section -->
+    <section id="welcome" class="welcome-section">
+        <div class="welcome-content">
+            <div class="welcome-text">
+                <h1 class="welcome-title">Hello there! 👋</h1>
+                <p class="welcome-subtitle">Welcome to your personal emotion tracking journey</p>
+                <p class="welcome-description">
+                    Track your daily moods, share your feelings, and discover inspiring quotes 
+                    that brighten your day. Let's make emotional wellness a daily habit!
+                </p>
+                <button class="cta-button" onclick="scrollToSection('mood-section')">
+                    Start Your Journey ✨
+                </button>
+            </div>
+            <div class="welcome-illustration">
+                <div class="floating-emoji">😊</div>
+                <div class="floating-emoji">😌</div>
+                <div class="floating-emoji">🌟</div>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <div class="scroll-arrow">↓</div>
+            <p>Scroll to explore</p>
+        </div>
+    </section>
+
+    <!-- Mood Selection Section -->
+    <section id="mood-section" class="mood-section">
+        <div class="container">
+            <h2 class="section-title">How are you feeling today? 🤔</h2>
+            <p class="section-subtitle">Select the emoji that best represents your current mood</p>
+            
+            <!-- Team Selection -->
+            <div class="team-selection">
+                <label for="team-select" class="team-label">Select your team/class:</label>
+                <select id="team-select" class="team-dropdown">
+                    <option value="">Choose your team...</option>
+                    <option value="1st-year">1st Year Students</option>
+                    <option value="2nd-year">2nd Year Students</option>
+                    <option value="3rd-year">3rd Year Students</option>
+                    <option value="4th-year">4th Year Students</option>
+                    <option value="faculty">Faculty/Staff</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            
+            <div class="mood-grid">
+                <div class="mood-card" data-mood="1" onclick="selectMood(1)">
+                    <div class="mood-emoji">😞</div>
+                    <p class="mood-label">Very Sad</p>
+                </div>
+                <div class="mood-card" data-mood="2" onclick="selectMood(2)">
+                    <div class="mood-emoji">😐</div>
+                    <p class="mood-label">Neutral</p>
+                </div>
+                <div class="mood-card" data-mood="3" onclick="selectMood(3)">
+                    <div class="mood-emoji">🙂</div>
+                    <p class="mood-label">Okay</p>
+                </div>
+                <div class="mood-card" data-mood="4" onclick="selectMood(4)">
+                    <div class="mood-emoji">😊</div>
+                    <p class="mood-label">Happy</p>
+                </div>
+                <div class="mood-card" data-mood="5" onclick="selectMood(5)">
+                    <div class="mood-emoji">😁</div>
+                    <p class="mood-label">Very Happy</p>
+                </div>
+            </div>
+            
+            <div class="mood-submit">
+                <button id="submit-mood" class="submit-button" onclick="submitMood()" disabled>
+                    Submit Mood 📝
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Text Input Section -->
+    <section id="text-section" class="text-section">
+        <div class="container">
+            <h2 class="section-title">Can you tell us how you're feeling? 💭</h2>
+            <p class="section-subtitle">Share your thoughts and feelings with us</p>
+            
+            <div class="text-input-container">
+                <textarea 
+                    id="feeling-text" 
+                    class="feeling-textarea" 
+                    placeholder="Write about your day, your feelings, or anything that's on your mind..."
+                    rows="6"
+                ></textarea>
+                <div class="text-actions">
+                    <button id="submit-text" class="submit-button" onclick="submitText()">
+                        Share My Feelings 💌
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quotes Section -->
+    <section id="quotes-section" class="quotes-section">
+        <div class="container">
+            <h2 class="section-title">All Good! 🌟</h2>
+            <p class="section-subtitle">Here's something to brighten your day</p>
+            
+            <div class="quote-container">
+                <div class="quote-card">
+                    <div class="quote-text" id="quote-text">
+                        "Every day is a new beginning. Take a deep breath and start again."
+                    </div>
+                    <div class="quote-author" id="quote-author">
+                        - Anonymous
+                    </div>
+                </div>
+                <button class="new-quote-button" onclick="loadRandomQuote()">
+                    Get Another Quote 🔄
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Emotion Tracker. Made with ❤️ for better mental health.</p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+    <script>
+        // Check authentication status and update navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNavigation();
+        });
+    </script>
+</body>
+</html>
