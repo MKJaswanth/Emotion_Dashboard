@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 flask==2.3.3
 flask-cors==4.0.0
 requests==2.31.0
@@ -8,3 +9,8 @@ wordcloud
 pandas
 numpy
 gunicorn
+=======
+flask
+requests
+gunicorn
+>>>>>>> ee865b00f7afd4343978156c585b341113780bc4

@@ -231,6 +231,10 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     border: 2px solid rgba(255, 255, 255, 0.1);
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .mood-card:hover {
@@ -243,6 +247,10 @@ body {
     background: rgba(255, 255, 255, 0.4);
     border-color: rgba(255, 255, 255, 0.5);
     transform: scale(1.05);
+}
+
+.mood-card:active {
+    transform: scale(0.95);
 }
 
 .mood-emoji {
@@ -424,6 +432,10 @@ body {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+    
     .welcome-content {
         flex-direction: column;
         text-align: center;
@@ -431,7 +443,11 @@ body {
     }
     
     .welcome-title {
-        font-size: 2.5rem;
+        font-size: 2rem;
+    }
+    
+    .welcome-subtitle {
+        font-size: 1rem;
     }
     
     .nav-links {
@@ -439,16 +455,78 @@ body {
     }
     
     .mood-grid {
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
         gap: 1rem;
     }
     
+    .mood-card {
+        padding: 1.5rem 1rem;
+    }
+    
+    .mood-emoji {
+        font-size: 2.5rem;
+    }
+    
     .section-title {
-        font-size: 2rem;
+        font-size: 1.8rem;
+    }
+    
+    .section-subtitle {
+        font-size: 1rem;
+    }
+    
+    .team-dropdown {
+        min-width: 200px;
+        padding: 0.8rem 1rem;
+    }
+    
+    .feeling-textarea {
+        padding: 1.5rem;
+        font-size: 1rem;
     }
     
     .quote-text {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
+    }
+    
+    .quote-card {
+        padding: 2rem 1.5rem;
+    }
+    
+    .submit-button, .new-quote-button {
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .welcome-title {
+        font-size: 1.8rem;
+    }
+    
+    .mood-grid {
+        grid-template-columns: 1fr;
+        gap: 0.8rem;
+    }
+    
+    .mood-card {
+        padding: 1rem;
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+    }
+    
+    .team-dropdown {
+        min-width: 180px;
+    }
+    
+    .feeling-textarea {
+        padding: 1rem;
+    }
+    
+    .quote-card {
+        padding: 1.5rem 1rem;
     }
 }
 

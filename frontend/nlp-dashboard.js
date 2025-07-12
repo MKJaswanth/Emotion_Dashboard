@@ -167,7 +167,7 @@ async function analyzeTeamSentiment() {
         }));
         
         // Call backend NLP service
-        const response = await fetch('http://localhost:5000/nlp-insights', {
+        const response = await fetch('https://emotion-dashboard-1-6kn0.onrender.com/nlp-insights', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -326,28 +326,5 @@ function displayInsights(insights) {
     insightsContainer.innerHTML = insightsHTML;
 }
 
-// Test NLP functionality with sample data
-function testNLP() {
-    const sampleText = "I'm feeling great about the project progress and excited to work with the team!";
-    
-    fetch('http://localhost:5000/analyze-text', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            text: sampleText
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('NLP Analysis Result:', data);
-    })
-    .catch(error => {
-        console.error('Error testing NLP:', error);
-    });
-}
-
 // Export functions for global access
 window.analyzeTeamSentiment = analyzeTeamSentiment;
-window.testNLP = testNLP;

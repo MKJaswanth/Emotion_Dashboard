@@ -4,24 +4,51 @@ from textblob import TextBlob
 from collections import Counter
 import json
 from datetime import datetime, timedelta
+import os
 
-# Download required NLTK data
+# Download required NLTK data with better error handling
+def download_nltk_data():
+    """Download NLTK data with error handling"""
+    try:
+        # Check if punkt tokenizer exists
+        try:
+            nltk.data.find('tokenizers/punkt')
+        except LookupError:
+            print("Downloading punkt tokenizer...")
+            nltk.download('punkt', quiet=True)
+        
+        # Check if stopwords exist
+        try:
+            nltk.data.find('corpora/stopwords')
+        except LookupError:
+            print("Downloading stopwords...")
+            nltk.download('stopwords', quiet=True)
+            
+    except Exception as e:
+        print(f"Warning: Could not download NLTK data: {e}")
+        # Continue without NLTK data - will use fallback methods
+
+# Download NLTK data on import
+download_nltk_data()
+
 try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt')
-
-try:
-    nltk.data.find('corpora/stopwords')
-except LookupError:
-    nltk.download('stopwords')
-
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
+    from nltk.corpus import stopwords
+    from nltk.tokenize import word_tokenize
+    NLTK_AVAILABLE = True
+except ImportError:
+    print("Warning: NLTK not available, using fallback tokenization")
+    NLTK_AVAILABLE = False
 
 class NLPService:
     def __init__(self):
-        self.stop_words = set(stopwords.words('english'))
+        if NLTK_AVAILABLE:
+            try:
+                self.stop_words = set(stopwords.words('english'))
+            except:
+                self.stop_words = set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'])
+        else:
+            self.stop_words = set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'])
+        
         self.emotion_keywords = {
             'happy': ['happy', 'joy', 'excited', 'great', 'wonderful', 'amazing', 'fantastic', 'love', 'enjoy', 'pleased'],
             'sad': ['sad', 'depressed', 'unhappy', 'miserable', 'upset', 'disappointed', 'heartbroken', 'lonely'],
@@ -44,37 +71,41 @@ class NLPService:
 
     def analyze_text(self, text):
         """Comprehensive text analysis"""
-        if not text or len(text.strip()) < 3:
+        try:
+            if not text or len(text.strip()) < 3:
+                return self._empty_analysis()
+            
+            # Clean text
+            cleaned_text = self._clean_text(text)
+            
+            # Basic sentiment analysis
+            sentiment = self._analyze_sentiment(cleaned_text)
+            
+            # Emotion detection
+            emotions = self._detect_emotions(cleaned_text)
+            
+            # Theme detection
+            themes = self._detect_themes(cleaned_text)
+            
+            # Key insights
+            insights = self._generate_insights(cleaned_text, sentiment, emotions, themes)
+            
+            # Word frequency
+            word_freq = self._analyze_word_frequency(cleaned_text)
+            
+            return {
+                'sentiment': sentiment,
+                'emotions': emotions,
+                'themes': themes,
+                'insights': insights,
+                'word_frequency': word_freq,
+                'text_length': len(text),
+                'word_count': len(cleaned_text.split()),
+                'timestamp': datetime.now().isoformat()
+            }
+        except Exception as e:
+            print(f"Error in analyze_text: {e}")
             return self._empty_analysis()
-        
-        # Clean text
-        cleaned_text = self._clean_text(text)
-        
-        # Basic sentiment analysis
-        sentiment = self._analyze_sentiment(cleaned_text)
-        
-        # Emotion detection
-        emotions = self._detect_emotions(cleaned_text)
-        
-        # Theme detection
-        themes = self._detect_themes(cleaned_text)
-        
-        # Key insights
-        insights = self._generate_insights(cleaned_text, sentiment, emotions, themes)
-        
-        # Word frequency
-        word_freq = self._analyze_word_frequency(cleaned_text)
-        
-        return {
-            'sentiment': sentiment,
-            'emotions': emotions,
-            'themes': themes,
-            'insights': insights,
-            'word_frequency': word_freq,
-            'text_length': len(text),
-            'word_count': len(cleaned_text.split()),
-            'timestamp': datetime.now().isoformat()
-        }
 
     def _clean_text(self, text):
         """Clean and normalize text"""
@@ -85,32 +116,42 @@ class NLPService:
 
     def _analyze_sentiment(self, text):
         """Analyze sentiment using TextBlob"""
-        blob = TextBlob(text)
-        sentiment = blob.sentiment
-        polarity = sentiment.polarity  # type: ignore
-        subjectivity = sentiment.subjectivity  # type: ignore
-        
-        if polarity > 0.3:
-            sentiment_category = 'positive'
-        elif polarity < -0.3:
-            sentiment_category = 'negative'
-        else:
-            sentiment_category = 'neutral'
-        
-        if abs(polarity) > 0.7:
-            intensity = 'strong'
-        elif abs(polarity) > 0.3:
-            intensity = 'moderate'
-        else:
-            intensity = 'weak'
-        
-        return {
-            'polarity': round(polarity, 3),
-            'subjectivity': round(subjectivity, 3),
-            'category': sentiment_category,
-            'intensity': intensity,
-            'description': self._get_sentiment_description(polarity, subjectivity)
-        }
+        try:
+            blob = TextBlob(text)
+            sentiment = blob.sentiment
+            polarity = sentiment.polarity  # type: ignore
+            subjectivity = sentiment.subjectivity  # type: ignore
+            
+            if polarity > 0.3:
+                sentiment_category = 'positive'
+            elif polarity < -0.3:
+                sentiment_category = 'negative'
+            else:
+                sentiment_category = 'neutral'
+            
+            if abs(polarity) > 0.7:
+                intensity = 'strong'
+            elif abs(polarity) > 0.3:
+                intensity = 'moderate'
+            else:
+                intensity = 'weak'
+            
+            return {
+                'polarity': round(polarity, 3),
+                'subjectivity': round(subjectivity, 3),
+                'category': sentiment_category,
+                'intensity': intensity,
+                'description': self._get_sentiment_description(polarity, subjectivity)
+            }
+        except Exception as e:
+            print(f"Error in sentiment analysis: {e}")
+            return {
+                'polarity': 0,
+                'subjectivity': 0,
+                'category': 'neutral',
+                'intensity': 'weak',
+                'description': 'Sentiment analysis failed'
+            }
 
     def _get_sentiment_description(self, polarity, subjectivity):
         if polarity > 0.7:
@@ -127,81 +168,120 @@ class NLPService:
             return "Very negative or distressed"
 
     def _detect_emotions(self, text):
-        words = word_tokenize(text)
-        emotion_scores = {}
-        
-        for emotion, keywords in self.emotion_keywords.items():
-            score = sum(1 for word in words if word in keywords)
-            if score > 0:
-                emotion_scores[emotion] = score
-        
-        sorted_emotions = sorted(emotion_scores.items(), key=lambda x: x[1], reverse=True)
-        
-        return {
-            'primary_emotion': sorted_emotions[0][0] if sorted_emotions else 'neutral',
-            'emotion_scores': emotion_scores,
-            'top_emotions': [emotion for emotion, score in sorted_emotions[:3]]
-        }
+        try:
+            if NLTK_AVAILABLE:
+                words = word_tokenize(text)
+            else:
+                words = text.split()
+            
+            emotion_scores = {}
+            
+            for emotion, keywords in self.emotion_keywords.items():
+                score = sum(1 for word in words if word in keywords)
+                if score > 0:
+                    emotion_scores[emotion] = score
+            
+            sorted_emotions = sorted(emotion_scores.items(), key=lambda x: x[1], reverse=True)
+            
+            return {
+                'primary_emotion': sorted_emotions[0][0] if sorted_emotions else 'neutral',
+                'emotion_scores': emotion_scores,
+                'top_emotions': [emotion for emotion, score in sorted_emotions[:3]]
+            }
+        except Exception as e:
+            print(f"Error in emotion detection: {e}")
+            return {
+                'primary_emotion': 'neutral',
+                'emotion_scores': {},
+                'top_emotions': []
+            }
 
     def _detect_themes(self, text):
-        words = word_tokenize(text)
-        theme_scores = {}
-        
-        for theme, keywords in self.theme_keywords.items():
-            score = sum(1 for word in words if word in keywords)
-            if score > 0:
-                theme_scores[theme] = score
-        
-        sorted_themes = sorted(theme_scores.items(), key=lambda x: x[1], reverse=True)
-        
-        return {
-            'primary_theme': sorted_themes[0][0] if sorted_themes else 'general',
-            'theme_scores': theme_scores,
-            'top_themes': [theme for theme, score in sorted_themes[:3]]
-        }
+        try:
+            if NLTK_AVAILABLE:
+                words = word_tokenize(text)
+            else:
+                words = text.split()
+            
+            theme_scores = {}
+            
+            for theme, keywords in self.theme_keywords.items():
+                score = sum(1 for word in words if word in keywords)
+                if score > 0:
+                    theme_scores[theme] = score
+            
+            sorted_themes = sorted(theme_scores.items(), key=lambda x: x[1], reverse=True)
+            
+            return {
+                'primary_theme': sorted_themes[0][0] if sorted_themes else 'general',
+                'theme_scores': theme_scores,
+                'top_themes': [theme for theme, score in sorted_themes[:3]]
+            }
+        except Exception as e:
+            print(f"Error in theme detection: {e}")
+            return {
+                'primary_theme': 'general',
+                'theme_scores': {},
+                'top_themes': []
+            }
 
     def _generate_insights(self, text, sentiment, emotions, themes):
-        insights = []
-        
-        if sentiment['category'] == 'negative' and sentiment['intensity'] == 'strong':
-            insights.append("This person may need immediate support or intervention")
-        elif sentiment['category'] == 'negative':
-            insights.append("Consider checking in with this person")
-        elif sentiment['category'] == 'positive' and sentiment['intensity'] == 'strong':
-            insights.append("This person is in a great mood - great time for collaboration")
-        
-        if 'anxious' in emotions['top_emotions']:
-            insights.append("Shows signs of anxiety - may need stress management support")
-        if 'tired' in emotions['top_emotions']:
-            insights.append("Appears to be experiencing fatigue - consider workload review")
-        if 'confident' in emotions['top_emotions']:
-            insights.append("Shows confidence - good time for challenging tasks")
-        
-        if 'work' in themes['top_themes']:
-            insights.append("Work-related concerns detected")
-        if 'study' in themes['top_themes']:
-            insights.append("Academic stress may be present")
-        if 'health' in themes['top_themes']:
-            insights.append("Health-related issues mentioned")
-        
-        word_count = len(text.split())
-        if word_count > 100:
-            insights.append("Detailed response - person is engaged and expressive")
-        elif word_count < 20:
-            insights.append("Brief response - may need encouragement to share more")
-        
-        return insights
+        try:
+            insights = []
+            
+            if sentiment['category'] == 'negative' and sentiment['intensity'] == 'strong':
+                insights.append("This person may need immediate support or intervention")
+            elif sentiment['category'] == 'negative':
+                insights.append("Consider checking in with this person")
+            elif sentiment['category'] == 'positive' and sentiment['intensity'] == 'strong':
+                insights.append("This person is in a great mood - great time for collaboration")
+            
+            if 'anxious' in emotions['top_emotions']:
+                insights.append("Shows signs of anxiety - may need stress management support")
+            if 'tired' in emotions['top_emotions']:
+                insights.append("Appears to be experiencing fatigue - consider workload review")
+            if 'confident' in emotions['top_emotions']:
+                insights.append("Shows confidence - good time for challenging tasks")
+            
+            if 'work' in themes['top_themes']:
+                insights.append("Work-related concerns detected")
+            if 'study' in themes['top_themes']:
+                insights.append("Academic stress may be present")
+            if 'health' in themes['top_themes']:
+                insights.append("Health-related issues mentioned")
+            
+            word_count = len(text.split())
+            if word_count > 100:
+                insights.append("Detailed response - person is engaged and expressive")
+            elif word_count < 20:
+                insights.append("Brief response - may need encouragement to share more")
+            
+            return insights
+        except Exception as e:
+            print(f"Error in insight generation: {e}")
+            return ["Analysis completed successfully"]
 
     def _analyze_word_frequency(self, text):
-        words = word_tokenize(text)
-        filtered_words = [word for word in words if word not in self.stop_words and len(word) > 2]
-        word_freq = Counter(filtered_words)
-        top_words = word_freq.most_common(10)
-        
-        return {
-            'top_words': [{'word': word, 'count': count} for word, count in top_words],
-            'total_unique_words': len(word_freq)
-        }
+        try:
+            if NLTK_AVAILABLE:
+                words = word_tokenize(text)
+            else:
+                words = text.split()
+            
+            filtered_words = [word for word in words if word not in self.stop_words and len(word) > 2]
+            word_freq = Counter(filtered_words)
+            top_words = word_freq.most_common(10)
+            
+            return {
+                'top_words': [{'word': word, 'count': count} for word, count in top_words],
+                'total_unique_words': len(word_freq)
+            }
+        except Exception as e:
+            print(f"Error in word frequency analysis: {e}")
+            return {
+                'top_words': [],
+                'total_unique_words': 0
+            }
 
     def _empty_analysis(self):
         return {

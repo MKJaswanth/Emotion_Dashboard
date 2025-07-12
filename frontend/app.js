@@ -11,122 +11,118 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const auth = firebase.auth();
+let db = null;
+let auth = null;
 
-// Check authentication status
-auth.onAuthStateChanged(function(user) {
-    if (user) {
-        // User is signed in
-        localStorage.setItem('userRole', 'user');
-        localStorage.setItem('isLoggedIn', 'true');
-        updateNavigation();
-    } else {
-        // User is signed out
-        localStorage.removeItem('userRole');
-        localStorage.removeItem('isLoggedIn');
-        updateNavigation();
-    }
-});
+try {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
+    auth = firebase.auth();
+} catch (error) {
+    // Fallback for when Firebase is not available
+}
+
+// Backend URL
+const BACKEND_URL = 'https://emotion-dashboard-1-6kn0.onrender.com';
 
 // Global variables
 let selectedMood = null;
-let quotes = [
-    {
-        text: "Every day is a new beginning. Take a deep breath and start again.",
-        author: "Anonymous"
-    },
-    {
-        text: "The only way to do great work is to love what you do.",
-        author: "Steve Jobs"
-    },
-    {
-        text: "Happiness is not something ready-made. It comes from your own actions.",
-        author: "Dalai Lama"
-    },
-    {
-        text: "Life is 10% what happens to you and 90% how you react to it.",
-        author: "Charles R. Swindoll"
-    },
-    {
-        text: "The future belongs to those who believe in the beauty of their dreams.",
-        author: "Eleanor Roosevelt"
-    },
-    {
-        text: "Success is not final, failure is not fatal: it is the courage to continue that counts.",
-        author: "Winston Churchill"
-    },
-    {
-        text: "Believe you can and you're halfway there.",
-        author: "Theodore Roosevelt"
-    },
-    {
-        text: "The only limit to our realization of tomorrow is our doubts of today.",
-        author: "Franklin D. Roosevelt"
-    },
-    {
-        text: "It does not matter how slowly you go as long as you do not stop.",
-        author: "Confucius"
-    },
-    {
-        text: "The journey of a thousand miles begins with one step.",
-        author: "Lao Tzu"
-    },
-    {
-        text: "What you get by achieving your goals is not as important as what you become by achieving your goals.",
-        author: "Zig Ziglar"
-    },
-    {
-        text: "The mind is everything. What you think you become.",
-        author: "Buddha"
-    },
-    {
-        text: "Don't watch the clock; do what it does. Keep going.",
-        author: "Sam Levenson"
-    },
-    {
-        text: "The best way to predict the future is to create it.",
-        author: "Peter Drucker"
-    },
-    {
-        text: "Your time is limited, don't waste it living someone else's life.",
-        author: "Steve Jobs"
-    }
+let selectedTeam = 'all';
+
+// Inspirational quotes
+const quotes = [
+    { text: "Every day is a new beginning. Take a deep breath and start again.", author: "Anonymous" },
+    { text: "You are stronger than you think and more capable than you imagine.", author: "Anonymous" },
+    { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
+    { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
+    { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+    { text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt" },
+    { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" },
+    { text: "The only limit to our realization of tomorrow is our doubts of today.", author: "Franklin D. Roosevelt" },
+    { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
+    { text: "Your time is limited, don't waste it living someone else's life.", author: "Steve Jobs" }
 ];
 
-// DOM Elements
-const moodCards = document.querySelectorAll('.mood-card');
-const submitMoodBtn = document.getElementById('submit-mood');
-const feelingTextarea = document.getElementById('feeling-text');
-const submitTextBtn = document.getElementById('submit-text');
-const quoteText = document.getElementById('quote-text');
-const quoteAuthor = document.getElementById('quote-author');
-const teamSelect = document.getElementById('team-select');
-
-// Initialize the app
+// Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    loadRandomQuote();
+    // Get DOM elements
+    const moodCards = document.querySelectorAll('.mood-card');
+    const submitMoodBtn = document.getElementById('submit-mood');
+    const textarea = document.getElementById('text-input');
+    const submitTextBtn = document.getElementById('submit-text');
+    const teamSelect = document.getElementById('team-select');
+    const quoteText = document.getElementById('quote-text');
+    const quoteAuthor = document.getElementById('quote-author');
+    
+    // Setup event listeners
     setupEventListeners();
     setupLogout();
     updateNavigation();
+    
+    // Load inspirational quotes
+    loadRandomQuote();
+    
+    // Setup smooth scrolling
+    setupSmoothScrolling();
+    
+    function setupEventListeners() {
+        // Mood card selection
+        if (moodCards && moodCards.length > 0) {
+            moodCards.forEach((card, index) => {
+                card.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const mood = parseInt(this.dataset.mood);
+                    selectMood(mood);
+                });
+            });
+        }
+
+        // Text area input
+        if (textarea) {
+            textarea.addEventListener('input', function() {
+                submitTextBtn.disabled = this.value.trim().length === 0;
+            });
+        }
+
+        // Initially disable text submit button
+        if (submitTextBtn) {
+            submitTextBtn.disabled = true;
+        }
+
+        // Submit mood button
+        if (submitMoodBtn) {
+            submitMoodBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                submitMood();
+            });
+        }
+
+        // Submit text button
+        if (submitTextBtn) {
+            submitTextBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                submitText();
+            });
+        }
+
+        // Start journey button
+        const startJourneyBtn = document.getElementById('start-journey-btn');
+        if (startJourneyBtn) {
+            startJourneyBtn.addEventListener('click', function() {
+                scrollToSection('mood-section');
+            });
+        }
+
+        // New quote button
+        const newQuoteBtn = document.getElementById('new-quote-btn');
+        if (newQuoteBtn) {
+            newQuoteBtn.addEventListener('click', function() {
+                loadRandomQuote();
+            });
+        }
+    }
 });
-
-// Setup event listeners
-function setupEventListeners() {
-    // Mood card selection
-    moodCards.forEach(card => {
-        card.addEventListener('click', function() {
-            const mood = parseInt(this.dataset.mood);
-            selectMood(mood);
-        });
-    });
-
-    // Text area input
-    feelingTextarea.addEventListener('input', function() {
-        submitTextBtn.disabled = this.value.trim().length === 0;
-    });
-}
 
 // Setup logout functionality
 function setupLogout() {
@@ -164,123 +160,195 @@ function updateNavigation() {
 
 // Logout function
 function logout() {
-    auth.signOut().then(() => {
+    if (auth) {
+        auth.signOut().then(() => {
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('isLoggedIn');
+            window.location.reload();
+        }).catch((error) => {
+            // Fallback logout
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('isLoggedIn');
+            window.location.reload();
+        });
+    } else {
+        // Fallback logout without Firebase Auth
         localStorage.removeItem('userRole');
         localStorage.removeItem('isLoggedIn');
         window.location.reload();
-    }).catch((error) => {
-        console.error('Logout error:', error);
-        // Fallback logout
-        localStorage.removeItem('userRole');
-        localStorage.removeItem('isLoggedIn');
-        window.location.reload();
-    });
+    }
 }
 
 // Mood selection function
 function selectMood(mood) {
-    selectedMood = mood;
-    
     // Remove selected class from all cards
-    moodCards.forEach(card => card.classList.remove('selected'));
+    const moodCards = document.querySelectorAll('.mood-card');
+    if (moodCards) {
+        moodCards.forEach(card => card.classList.remove('selected'));
+    }
     
     // Add selected class to clicked card
     const selectedCard = document.querySelector(`[data-mood="${mood}"]`);
-    selectedCard.classList.add('selected');
+    if (selectedCard) {
+        selectedCard.classList.add('selected');
+        
+        // Add animation effect
+        selectedCard.style.transform = 'scale(1.1)';
+        setTimeout(() => {
+            selectedCard.style.transform = 'scale(1.05)';
+        }, 200);
+        selectedMood = mood;
+    }
     
     // Enable submit button
-    submitMoodBtn.disabled = false;
-    
-    // Add animation effect
-    selectedCard.style.transform = 'scale(1.1)';
-    setTimeout(() => {
-        selectedCard.style.transform = 'scale(1.05)';
-    }, 200);
+    const submitMoodBtn = document.getElementById('submit-mood');
+    if (submitMoodBtn) {
+        submitMoodBtn.disabled = false;
+    }
 }
 
 // Submit mood to Firebase
 function submitMood() {
-    if (!selectedMood) {
-        showNotification('Please select a mood first!', 'error');
-        return;
-    }
-
-    if (!teamSelect.value) {
-        showNotification('Please select your team/class first!', 'error');
-        return;
-    }
-
-    const moodData = {
+    if (!selectedMood) return;
+    
+    // Get selected team
+    const teamSelect = document.getElementById('team-select');
+    const team = teamSelect ? teamSelect.value : 'all';
+    
+    // Create mood entry
+    const moodEntry = {
         mood: selectedMood,
-        team: teamSelect.value,
-        timestamp: Date.now(),
-        date: new Date().toISOString()
+        team: team,
+        timestamp: Date.now()
     };
-
+    
     // Save to Firebase
-    db.ref('mood_entries').push(moodData)
-        .then(() => {
-            showNotification('Mood submitted successfully! 😊', 'success');
-            
-            // Reset selection
-            moodCards.forEach(card => card.classList.remove('selected'));
-            selectedMood = null;
-            submitMoodBtn.disabled = true;
-            
-            // Scroll to next section
-            setTimeout(() => {
-                scrollToSection('text-section');
-            }, 1000);
-        })
-        .catch(error => {
-            console.error('Error submitting mood:', error);
-            showNotification('Error submitting mood. Please try again.', 'error');
-        });
+    if (db) {
+        db.ref('mood_entries').push(moodEntry)
+            .then(() => {
+                showNotification('Mood submitted successfully! 😊', 'success');
+                resetMoodSelection();
+            })
+            .catch(error => {
+                showNotification('Error submitting mood. Please try again.', 'error');
+            });
+    } else {
+        // Fallback: save to localStorage
+        const entries = JSON.parse(localStorage.getItem('mood_entries') || '[]');
+        entries.push(moodEntry);
+        localStorage.setItem('mood_entries', JSON.stringify(entries));
+        showNotification('Mood submitted successfully! 😊', 'success');
+        resetMoodSelection();
+    }
+    
+    // Send to backend
+    sendMoodToBackend(moodEntry);
 }
 
 // Submit text to Firebase
 function submitText() {
-    const text = feelingTextarea.value.trim();
+    const textarea = document.getElementById('text-input');
+    const text = textarea ? textarea.value.trim() : '';
     
-    if (!text) {
-        showNotification('Please write something about your feelings!', 'error');
-        return;
-    }
-
-    if (!teamSelect.value) {
-        showNotification('Please select your team/class first!', 'error');
-        return;
-    }
-
-    const textData = {
+    if (!text) return;
+    
+    // Get selected team
+    const teamSelect = document.getElementById('team-select');
+    const team = teamSelect ? teamSelect.value : 'all';
+    
+    // Create text entry
+    const textEntry = {
         text: text,
-        team: teamSelect.value,
-        timestamp: Date.now(),
-        date: new Date().toISOString()
+        team: team,
+        timestamp: Date.now()
     };
-
+    
     // Save to Firebase
-    db.ref('text_entries').push(textData)
-        .then(() => {
-            showNotification('Your feelings have been shared! 💌', 'success');
-            
-            // Clear textarea
-            feelingTextarea.value = '';
-            submitTextBtn.disabled = true;
-            
-            // Scroll to quotes section
-            setTimeout(() => {
-                scrollToSection('quotes-section');
-            }, 1000);
+    if (db) {
+        db.ref('text_entries').push(textEntry)
+            .then(() => {
+                showNotification('Your feelings have been shared! 💌', 'success');
+                resetTextInput();
+            })
+            .catch(error => {
+                showNotification('Error submitting text. Please try again.', 'error');
+            });
+    } else {
+        // Fallback: save to localStorage
+        const entries = JSON.parse(localStorage.getItem('text_entries') || '[]');
+        entries.push(textEntry);
+        localStorage.setItem('text_entries', JSON.stringify(entries));
+        showNotification('Your feelings have been shared! 💌', 'success');
+        resetTextInput();
+    }
+    
+    // Send to backend
+    sendTextToBackend(textEntry);
+}
+
+// Reset mood selection
+function resetMoodSelection() {
+    const moodCards = document.querySelectorAll('.mood-card');
+    moodCards.forEach(card => card.classList.remove('selected'));
+    selectedMood = null;
+    
+    const submitMoodBtn = document.getElementById('submit-mood');
+    if (submitMoodBtn) {
+        submitMoodBtn.disabled = true;
+    }
+}
+
+// Reset text input
+function resetTextInput() {
+    const textarea = document.getElementById('text-input');
+    if (textarea) {
+        textarea.value = '';
+    }
+    
+    const submitTextBtn = document.getElementById('submit-text');
+    if (submitTextBtn) {
+        submitTextBtn.disabled = true;
+    }
+}
+
+// Send mood to backend
+function sendMoodToBackend(moodEntry) {
+    fetch(`${BACKEND_URL}/alert`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            avgMood: moodEntry.mood,
+            team: moodEntry.team
         })
-        .catch(error => {
-            console.error('Error submitting text:', error);
-            showNotification('Error submitting text. Please try again.', 'error');
-        });
+    }).catch(error => {
+        // Silently fail - backend is optional
+    });
+}
+
+// Send text to backend
+function sendTextToBackend(textEntry) {
+    fetch(`${BACKEND_URL}/analyze-text`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            text: textEntry.text
+        })
+    }).catch(error => {
+        // Silently fail - backend is optional
+    });
 }
 
 // Load random quote
 function loadRandomQuote() {
+    const quoteText = document.getElementById('quote-text');
+    const quoteAuthor = document.getElementById('quote-author');
+    
+    if (!quoteText || !quoteAuthor) return;
+    
     const randomIndex = Math.floor(Math.random() * quotes.length);
     const quote = quotes[randomIndex];
     
@@ -307,6 +375,21 @@ function scrollToSection(sectionId) {
             block: 'start'
         });
     }
+}
+
+// Setup smooth scrolling
+function setupSmoothScrolling() {
+    const links = document.querySelectorAll('a[href^="#"]');
+    links.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href').substring(1);
+            const targetElement = document.getElementById(targetId);
+            if (targetElement) {
+                targetElement.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
 }
 
 // Show notification
@@ -345,7 +428,9 @@ function showNotification(message, type = 'info') {
     setTimeout(() => {
         notification.style.transform = 'translateX(400px)';
         setTimeout(() => {
-            document.body.removeChild(notification);
+            if (document.body.contains(notification)) {
+                document.body.removeChild(notification);
+            }
         }, 300);
     }, 3000);
 }
@@ -355,28 +440,19 @@ document.addEventListener('scroll', function() {
     const scrolled = window.pageYOffset;
     const navbar = document.querySelector('.navbar');
     
-    if (scrolled > 100) {
-        navbar.style.background = 'rgba(255, 255, 255, 0.98)';
-    } else {
-        navbar.style.background = 'rgba(255, 255, 255, 0.95)';
+    if (navbar) {
+        if (scrolled > 100) {
+            navbar.style.background = 'rgba(255, 255, 255, 0.98)';
+        } else {
+            navbar.style.background = 'rgba(255, 255, 255, 0.95)';
+        }
     }
 });
-
-// Add loading animation for buttons
-function addLoadingState(button) {
-    const originalText = button.textContent;
-    button.textContent = 'Loading...';
-    button.disabled = true;
-    
-    return () => {
-        button.textContent = originalText;
-        button.disabled = false;
-    };
-}
 
 // Export functions for global access
 window.selectMood = selectMood;
 window.submitMood = submitMood;
 window.submitText = submitText;
 window.loadRandomQuote = loadRandomQuote;
-window.scrollToSection = scrollToSection; 
+window.scrollToSection = scrollToSection;
+window.updateNavigation = updateNavigation; 

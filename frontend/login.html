@@ -221,9 +221,19 @@
                 // User is signed in
                 localStorage.setItem('userRole', 'user');
                 localStorage.setItem('isLoggedIn', 'true');
-                window.location.href = 'index.html';
+                redirectBasedOnRole();
             }
         });
+
+        // Function to redirect based on user role
+        function redirectBasedOnRole() {
+            const userRole = localStorage.getItem('userRole');
+            if (userRole === 'admin') {
+                window.location.href = 'dashboard.html';
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
 
         // Admin login
         document.getElementById('admin-form').addEventListener('submit', function(e) {
@@ -235,7 +245,7 @@
             if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
                 localStorage.setItem('userRole', 'admin');
                 localStorage.setItem('isLoggedIn', 'true');
-                window.location.href = 'index.html';
+                window.location.href = 'dashboard.html';
             } else {
                 alert('Invalid admin credentials!');
             }
@@ -248,7 +258,7 @@
                 .then((result) => {
                     localStorage.setItem('userRole', 'user');
                     localStorage.setItem('isLoggedIn', 'true');
-                    window.location.href = 'index.html';
+                    redirectBasedOnRole();
                 })
                 .catch((error) => {
                     console.error('Google login error:', error);

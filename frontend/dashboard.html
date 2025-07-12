@@ -266,15 +266,79 @@
             }
             
             .dashboard-header h1 {
-                font-size: 2rem;
+                font-size: 1.8rem;
+            }
+            
+            .dashboard-header p {
+                font-size: 1rem;
+            }
+            
+            .header-actions {
+                position: static;
+                margin-bottom: 20px;
+                justify-content: center;
+            }
+            
+            .header-button {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            
+            .filter-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .filter-dropdown {
+                min-width: 200px;
+            }
+            
+            .dashboard-card {
+                padding: 20px;
+            }
+            
+            .card-title {
+                font-size: 1.3rem;
+            }
+            
+            .chart-container {
+                min-height: 250px;
+            }
+            
+            .text-entries {
+                padding: 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .dashboard-header h1 {
+                font-size: 1.5rem;
             }
             
             .stats-grid {
                 grid-template-columns: 1fr;
             }
             
-            .filter-container {
-                flex-direction: column;
+            .header-button {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+            
+            .filter-dropdown {
+                min-width: 180px;
+            }
+            
+            .dashboard-card {
+                padding: 15px;
+            }
+            
+            .card-title {
+                font-size: 1.2rem;
             }
         }
     </style>

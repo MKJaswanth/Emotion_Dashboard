@@ -3,7 +3,12 @@ from flask_cors import CORS
 import requests
 import os
 from datetime import datetime
+import logging
 from nlp_service import NLPService
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 CORS(app, origins=["*"])  # Enable CORS for all origins in production
@@ -11,7 +16,12 @@ CORS(app, origins=["*"])  # Enable CORS for all origins in production
 DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1387057201931223110/zjX1FEcTkiErkZwAKKcANFmwgoFhnT2fov1qu9u9EFnu_sMp2CuFB83Z1_ygcOGDWolr"
 
 # Initialize NLP service
-nlp_service = NLPService()
+try:
+    nlp_service = NLPService()
+    logger.info("NLP service initialized successfully")
+except Exception as e:
+    logger.error(f"Failed to initialize NLP service: {e}")
+    nlp_service = None
 
 # Team display names mapping
 TEAM_NAMES = {
@@ -64,19 +74,29 @@ def send_alert():
 @app.route("/analyze-text", methods=["POST"])
 def analyze_text():
     """Analyze a single text entry using NLP"""
-    data = request.get_json()
-    text = data.get("text", "")
-    
-    if not text:
-        return jsonify({"error": "No text provided"}), 400
-    
     try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No JSON data provided"}), 400
+        
+        text = data.get("text", "")
+        logger.info(f"Analyzing text: {text[:50]}...")
+        
+        if not text:
+            return jsonify({"error": "No text provided"}), 400
+        
+        if not nlp_service:
+            return jsonify({"error": "NLP service not available"}), 500
+        
         analysis = nlp_service.analyze_text(text)
+        logger.info(f"Analysis completed successfully for text: {text[:50]}...")
+        
         return jsonify({
             "status": "success",
             "analysis": analysis
         }), 200
     except Exception as e:
+        logger.error(f"Error in analyze_text: {e}")
         return jsonify({
             "status": "error",
             "message": str(e)
@@ -85,10 +105,13 @@ def analyze_text():
 @app.route("/analyze-team/<team>", methods=["GET"])
 def analyze_team_sentiment(team):
     """Analyze sentiment trends for a specific team"""
-    if team not in TEAM_NAMES and team != "all":
-        return jsonify({"error": "Invalid team"}), 400
-    
     try:
+        if team not in TEAM_NAMES and team != "all":
+            return jsonify({"error": "Invalid team"}), 400
+        
+        if not nlp_service:
+            return jsonify({"error": "NLP service not available"}), 500
+        
         # In a real implementation, you'd fetch text entries from your database
         # For now, we'll return a sample analysis
         sample_entries = [
@@ -97,6 +120,7 @@ def analyze_team_sentiment(team):
             {"text": "I'm a bit stressed about the upcoming deadline."}
         ]
         
+        logger.info(f"Analyzing team sentiment for team: {team}")
         analysis = nlp_service.analyze_team_sentiment(sample_entries)
         
         return jsonify({
@@ -106,6 +130,7 @@ def analyze_team_sentiment(team):
             "analysis": analysis
         }), 200
     except Exception as e:
+        logger.error(f"Error in analyze_team_sentiment: {e}")
         return jsonify({
             "status": "error",
             "message": str(e)
@@ -114,19 +139,28 @@ def analyze_team_sentiment(team):
 @app.route("/nlp-insights", methods=["POST"])
 def get_nlp_insights():
     """Get comprehensive NLP insights for multiple text entries"""
-    data = request.get_json()
-    text_entries = data.get("entries", [])
-    team = data.get("team", "all")
-    
-    if not text_entries:
-        return jsonify({"error": "No text entries provided"}), 400
-    
     try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No JSON data provided"}), 400
+        
+        text_entries = data.get("entries", [])
+        team = data.get("team", "all")
+        
+        logger.info(f"Getting NLP insights for team: {team}, entries: {len(text_entries)}")
+        
+        if not text_entries:
+            return jsonify({"error": "No text entries provided"}), 400
+        
+        if not nlp_service:
+            return jsonify({"error": "NLP service not available"}), 500
+        
         # Analyze each entry
         individual_analyses = []
-        for entry in text_entries:
+        for i, entry in enumerate(text_entries):
             text = entry.get("text", "")
             if text:
+                logger.info(f"Analyzing entry {i+1}/{len(text_entries)}: {text[:50]}...")
                 analysis = nlp_service.analyze_text(text)
                 individual_analyses.append({
                     "original_text": text,
@@ -134,10 +168,13 @@ def get_nlp_insights():
                 })
         
         # Get team-level analysis
+        logger.info("Performing team-level analysis")
         team_analysis = nlp_service.analyze_team_sentiment(text_entries)
         
         # Generate summary insights
         summary_insights = generate_summary_insights(individual_analyses, team_analysis)
+        
+        logger.info(f"NLP insights completed successfully for team: {team}")
         
         return jsonify({
             "status": "success",
@@ -148,6 +185,7 @@ def get_nlp_insights():
             "summary_insights": summary_insights
         }), 200
     except Exception as e:
+        logger.error(f"Error in get_nlp_insights: {e}")
         return jsonify({
             "status": "error",
             "message": str(e)
@@ -228,8 +266,35 @@ def health_check():
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
         "version": "1.0.0",
-        "nlp_service": "active"
+        "nlp_service": "active" if nlp_service else "inactive"
     })
+
+@app.route("/test-nlp", methods=["GET"])
+def test_nlp():
+    """Test NLP functionality with sample text"""
+    try:
+        if not nlp_service:
+            return jsonify({
+                "status": "error",
+                "message": "NLP service not available"
+            }), 500
+        
+        sample_text = "I'm feeling great about the project progress and excited to work with the team!"
+        logger.info("Testing NLP with sample text")
+        
+        analysis = nlp_service.analyze_text(sample_text)
+        
+        return jsonify({
+            "status": "success",
+            "sample_text": sample_text,
+            "analysis": analysis
+        }), 200
+    except Exception as e:
+        logger.error(f"Error in test_nlp: {e}")
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

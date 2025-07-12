@@ -6,6 +6,7 @@
     <title>Emotion Tracker - Your Daily Mood Companion</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -36,7 +37,7 @@
                     Track your daily moods, share your feelings, and discover inspiring quotes 
                     that brighten your day. Let's make emotional wellness a daily habit!
                 </p>
-                <button class="cta-button" onclick="scrollToSection('mood-section')">
+                <button class="cta-button" id="start-journey-btn">
                     Start Your Journey ✨
                 </button>
             </div>
@@ -73,30 +74,30 @@
             </div>
             
             <div class="mood-grid">
-                <div class="mood-card" data-mood="1" onclick="selectMood(1)">
+                <div class="mood-card" data-mood="1">
                     <div class="mood-emoji">😞</div>
                     <p class="mood-label">Very Sad</p>
                 </div>
-                <div class="mood-card" data-mood="2" onclick="selectMood(2)">
+                <div class="mood-card" data-mood="2">
                     <div class="mood-emoji">😐</div>
                     <p class="mood-label">Neutral</p>
                 </div>
-                <div class="mood-card" data-mood="3" onclick="selectMood(3)">
+                <div class="mood-card" data-mood="3">
                     <div class="mood-emoji">🙂</div>
                     <p class="mood-label">Okay</p>
                 </div>
-                <div class="mood-card" data-mood="4" onclick="selectMood(4)">
+                <div class="mood-card" data-mood="4">
                     <div class="mood-emoji">😊</div>
                     <p class="mood-label">Happy</p>
                 </div>
-                <div class="mood-card" data-mood="5" onclick="selectMood(5)">
+                <div class="mood-card" data-mood="5">
                     <div class="mood-emoji">😁</div>
                     <p class="mood-label">Very Happy</p>
                 </div>
             </div>
             
             <div class="mood-submit">
-                <button id="submit-mood" class="submit-button" onclick="submitMood()" disabled>
+                <button id="submit-mood" class="submit-button" disabled>
                     Submit Mood 📝
                 </button>
             </div>
@@ -117,7 +118,7 @@
                     rows="6"
                 ></textarea>
                 <div class="text-actions">
-                    <button id="submit-text" class="submit-button" onclick="submitText()">
+                    <button id="submit-text" class="submit-button">
                         Share My Feelings 💌
                     </button>
                 </div>
@@ -140,7 +141,7 @@
                         - Anonymous
                     </div>
                 </div>
-                <button class="new-quote-button" onclick="loadRandomQuote()">
+                <button class="new-quote-button" id="new-quote-btn">
                     Get Another Quote 🔄
                 </button>
             </div>
@@ -155,11 +156,5 @@
     </footer>
 
     <script src="app.js"></script>
-    <script>
-        // Check authentication status and update navigation
-        document.addEventListener('DOMContentLoaded', function() {
-            updateNavigation();
-        });
-    </script>
 </body>
 </html>

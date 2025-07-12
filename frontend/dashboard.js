@@ -1,4 +1,4 @@
-// Firebase Config
+ // Firebase Config
 const firebaseConfig = {
     apiKey: "AIzaSyC639yfUtTgHbCmnqUp_J7uZ3RrFUbR5PU",
     authDomain: "emotion-dashboard-d31ca.firebaseapp.com",
@@ -12,6 +12,9 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+
+// Backend URL
+const BACKEND_URL = 'https://emotion-dashboard-1-6kn0.onrender.com';
 
 // Global variables
 let moodCounts = [0, 0, 0, 0, 0];
@@ -103,10 +106,15 @@ function checkAdminAuth() {
     const userRole = localStorage.getItem('userRole');
     const isLoggedIn = localStorage.getItem('isLoggedIn');
     
+    console.log('Dashboard auth check:', { userRole, isLoggedIn });
+    
     if (userRole !== 'admin' || !isLoggedIn) {
+        console.log('Auth failed, redirecting to login...');
         window.location.href = 'login.html';
         return;
     }
+    
+    console.log('Auth successful, dashboard access granted');
 }
 
 // Setup logout functionality
@@ -310,23 +318,25 @@ function showLowMoraleAlert(avgMood, teamName) {
         }, 500);
     }, 5000);
 
-    // Send Discord notification
+    // Send Discord notification via backend
     sendDiscordAlert(avgMood, teamName);
 }
 
-// Send Discord alert
+// Send Discord alert via backend
 function sendDiscordAlert(avgMood, teamName) {
-    fetch("https://discord.com/api/webhooks/1387057201931223110/zjX1FEcTkiErkZwAKKcANFmwgoFhnT2fov1qu9u9EFnu_sMp2CuFB83Z1_ygcOGDWolr", {
+    fetch(`${BACKEND_URL}/alert`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            content: `⚠️ **${teamName} Morale Alert**: Average mood is ${avgMood}/5\nConsider checking in with your team members! 💙`
+            avgMood: avgMood,
+            team: selectedTeam
         })
     })
-    .then(res => console.log("📤 Alert sent to Discord"))
-    .catch(err => console.error("❌ Discord error:", err));
+    .then(res => res.json())
+    .then(data => console.log("📤 Alert sent via backend:", data))
+    .catch(err => console.error("❌ Backend alert error:", err));
 }
 
 // Add CSS animations
@@ -355,4 +365,3 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
-
