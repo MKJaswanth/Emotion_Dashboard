@@ -2,8 +2,11 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
+import jwt
+import hashlib
+from functools import wraps
 from nlp_service import NLPService
 
 # Configure logging
@@ -13,7 +16,17 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 CORS(app, origins=["*"])  # Enable CORS for all origins in production
 
+# JWT Configuration
+JWT_SECRET = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production')
+JWT_ALGORITHM = 'HS256'
+
 DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1387057201931223110/zjX1FEcTkiErkZwAKKcANFmwgoFhnT2fov1qu9u9EFnu_sMp2CuFB83Z1_ygcOGDWolr"
+
+# Mock database for demonstration
+users_db = {}
+organizations_db = {}
+teams_db = {}
+mood_data_db = {}
 
 # Initialize NLP service
 try:
@@ -33,9 +46,156 @@ TEAM_NAMES = {
     'other': 'Other'
 }
 
+# Authentication decorators
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get('Authorization')
+        if not token:
+            return jsonify({'message': 'Token is missing'}), 401
+        
+        try:
+            token = token.split(' ')[1]  # Remove 'Bearer ' prefix
+            data = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+            current_user = users_db.get(data['user_id'])
+            if not current_user:
+                return jsonify({'message': 'Invalid token'}), 401
+        except:
+            return jsonify({'message': 'Invalid token'}), 401
+        
+        return f(current_user, *args, **kwargs)
+    return decorated
+
+def admin_required(f):
+    @wraps(f)
+    def decorated(current_user, *args, **kwargs):
+        if current_user.get('role') != 'admin':
+            return jsonify({'message': 'Admin access required'}), 403
+        return f(current_user, *args, **kwargs)
+    return decorated
+
 @app.route("/")
 def home():
-    return "Emotion Tracker Backend is running! 🚀"
+    return "Emotion Analytics Backend is running! 🚀"
+
+# Authentication Routes
+@app.route("/api/auth/register", methods=["POST"])
+def register():
+    """Register a new user"""
+    data = request.get_json()
+    
+    if not data or not data.get('email') or not data.get('password'):
+        return jsonify({'error': 'Email and password required'}), 400
+    
+    email = data['email']
+    if email in users_db:
+        return jsonify({'error': 'User already exists'}), 409
+    
+    # Hash password
+    password_hash = hashlib.sha256(data['password'].encode()).hexdigest()
+    
+    user_id = str(len(users_db) + 1)
+    user = {
+        'id': user_id,
+        'email': email,
+        'password_hash': password_hash,
+        'name': data.get('name', ''),
+        'role': data.get('role', 'user'),
+        'organization_id': data.get('organization_id'),
+        'team_id': data.get('team_id'),
+        'created_at': datetime.now().isoformat()
+    }
+    
+    users_db[email] = user
+    
+    # Generate JWT token
+    token = jwt.encode({
+        'user_id': user_id,
+        'email': email,
+        'exp': datetime.utcnow() + timedelta(days=30)
+    }, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    
+    return jsonify({
+        'message': 'User registered successfully',
+        'token': token,
+        'user': {
+            'id': user_id,
+            'email': email,
+            'name': user['name'],
+            'role': user['role']
+        }
+    }), 201
+
+@app.route("/api/auth/login", methods=["POST"])
+def login():
+    """Login user"""
+    data = request.get_json()
+    
+    if not data or not data.get('email') or not data.get('password'):
+        return jsonify({'error': 'Email and password required'}), 400
+    
+    email = data['email']
+    password_hash = hashlib.sha256(data['password'].encode()).hexdigest()
+    
+    user = users_db.get(email)
+    if not user or user['password_hash'] != password_hash:
+        return jsonify({'error': 'Invalid credentials'}), 401
+    
+    # Generate JWT token
+    token = jwt.encode({
+        'user_id': user['id'],
+        'email': email,
+        'exp': datetime.utcnow() + timedelta(days=30)
+    }, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    
+    return jsonify({
+        'message': 'Login successful',
+        'token': token,
+        'user': {
+            'id': user['id'],
+            'email': email,
+            'name': user['name'],
+            'role': user['role']
+        }
+    })
+
+@app.route("/api/mood/submit", methods=["POST"])
+@token_required
+def submit_mood(current_user):
+    """Submit mood entry"""
+    data = request.get_json()
+    
+    if not data or not data.get('mood_score'):
+        return jsonify({'error': 'Mood score required'}), 400
+    
+    mood_entry = {
+        'user_id': current_user['id'],
+        'mood_score': data['mood_score'],
+        'text': data.get('text', ''),
+        'timestamp': datetime.now().isoformat(),
+        'location': data.get('location'),
+        'activity': data.get('activity'),
+        'tags': data.get('tags', [])
+    }
+    
+    # Store in database (mock)
+    if current_user['id'] not in mood_data_db:
+        mood_data_db[current_user['id']] = []
+    mood_data_db[current_user['id']].append(mood_entry)
+    
+    # Analyze text if provided
+    analysis = None
+    if mood_entry['text'] and nlp_service:
+        try:
+            analysis = nlp_service.analyze_text(mood_entry['text'])
+        except Exception as e:
+            logger.error(f"Error analyzing text: {e}")
+    
+    return jsonify({
+        'message': 'Mood submitted successfully',
+        'mood_entry': mood_entry,
+        'analysis': analysis
+    }), 201
 
 @app.route("/alert", methods=["POST"])
 def send_alert():
@@ -295,6 +455,29 @@ def test_nlp():
             "status": "error",
             "message": str(e)
         }), 500
+
+@app.route("/api/test", methods=["GET"])
+def test_api():
+    """Test API endpoint"""
+    return jsonify({
+        'message': 'API is working!',
+        'endpoints': {
+            'auth': {
+                'register': 'POST /api/auth/register',
+                'login': 'POST /api/auth/login'
+            },
+            'mood': {
+                'submit': 'POST /api/mood/submit (requires auth)',
+                'history': 'GET /api/mood/history (requires auth)'
+            },
+            'analytics': {
+                'analyze_text': 'POST /analyze-text',
+                'team_sentiment': 'GET /analyze-team/<team>',
+                'nlp_insights': 'POST /nlp-insights'
+            }
+        },
+        'jwt_available': True
+    })
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

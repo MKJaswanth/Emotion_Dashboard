@@ -8,7 +8,7 @@ class Config:
 class DevelopmentConfig(Config):
     """Development configuration"""
     DEBUG = True
-    CORS_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:5000"]
+    CORS_ORIGINS = ["http://localhost:3000", "https://emotion-dashboard-1-6kn0.onrender.com"]
 
 class ProductionConfig(Config):
     """Production configuration"""
@@ -18,7 +18,7 @@ class ProductionConfig(Config):
 class TestingConfig(Config):
     """Testing configuration"""
     TESTING = True
-    CORS_ORIGINS = ["http://localhost:3000"]
+    CORS_ORIGINS = ["https://emotion-dashboard-1-6kn0.onrender.com"]
 
 config = {
     'development': DevelopmentConfig,
