@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> 9b41492cb2827bc779b6b21bca91f0884ce0581b
 # 🎭 Emotion Tracker - Real-Time Mood Dashboard
 
 A beautiful, modern web application for tracking team emotions and feelings in real-time. Built with HTML, CSS, JavaScript, and Firebase.

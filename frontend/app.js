@@ -54,6 +54,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const quoteText = document.getElementById('quote-text');
     const quoteAuthor = document.getElementById('quote-author');
     
+    // Debug: Log element findings
+    console.log('DOM Elements found:', {
+        moodCards: moodCards.length,
+        submitMoodBtn: !!submitMoodBtn,
+        textarea: !!textarea,
+        submitTextBtn: !!submitTextBtn,
+        teamSelect: !!teamSelect,
+        quoteText: !!quoteText,
+        quoteAuthor: !!quoteAuthor
+    });
+    
     // Setup event listeners
     setupEventListeners();
     setupLogout();
@@ -64,6 +75,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Setup smooth scrolling
     setupSmoothScrolling();
+    
+    // Setup mobile navigation
+    setupMobileNavigation();
     
     function setupEventListeners() {
         // Mood card selection
@@ -81,13 +95,18 @@ document.addEventListener('DOMContentLoaded', function() {
         // Text area input
         if (textarea) {
             textarea.addEventListener('input', function() {
-                submitTextBtn.disabled = this.value.trim().length === 0;
+                const hasText = this.value.trim().length > 0;
+                submitTextBtn.disabled = !hasText;
             });
+        } else {
+            console.error('Textarea not found!');
         }
 
         // Initially disable text submit button
         if (submitTextBtn) {
             submitTextBtn.disabled = true;
+        } else {
+            console.error('Submit text button not found!');
         }
 
         // Submit mood button
@@ -101,9 +120,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Submit text button
         if (submitTextBtn) {
             submitTextBtn.addEventListener('click', function(e) {
+                console.log('Submit text button clicked');
                 e.preventDefault();
                 submitText();
             });
+        } else {
+            console.error('Submit text button not found!');
         }
 
         // Start journey button
@@ -247,10 +269,17 @@ function submitMood() {
 
 // Submit text to Firebase
 function submitText() {
+    console.log('Submit text function called');
     const textarea = document.getElementById('text-input');
     const text = textarea ? textarea.value.trim() : '';
     
-    if (!text) return;
+    console.log('Textarea found:', !!textarea);
+    console.log('Text content:', text);
+    
+    if (!text) {
+        console.log('No text to submit');
+        return;
+    }
     
     // Get selected team
     const teamSelect = document.getElementById('team-select');
@@ -373,6 +402,36 @@ function scrollToSection(sectionId) {
         section.scrollIntoView({ 
             behavior: 'smooth',
             block: 'start'
+        });
+    }
+}
+
+// Setup mobile navigation
+function setupMobileNavigation() {
+    const hamburger = document.getElementById('hamburger');
+    const navLinks = document.getElementById('nav-links');
+    
+    if (hamburger && navLinks) {
+        hamburger.addEventListener('click', function() {
+            hamburger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+        
+        // Close mobile menu when clicking on a link
+        const mobileLinks = navLinks.querySelectorAll('a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+            });
+        });
+        
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!hamburger.contains(e.target) && !navLinks.contains(e.target)) {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+            }
         });
     }
 }
