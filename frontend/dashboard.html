@@ -5,6 +5,7 @@
     <title>MoodFlow Dashboard - Your Wellness Analytics</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -468,5 +469,37 @@
     </div>
 
     <script src="dashboard.js"></script>
+    
+    <script>
+        // Firebase config
+        var firebaseConfig = {
+            apiKey: "AIzaSyC639yfUtTgHbCmnqUp_J7uZ3RrFUbR5PU",
+            authDomain: "emotion-dashboard-d31ca.firebaseapp.com",
+            projectId: "emotion-dashboard-d31ca",
+            appId: "1:191620106192:web:68fe5b79d2ee42ecd71bd5"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // Check authentication state
+        auth.onAuthStateChanged(function(user) {
+            if (!user) {
+                // User is not logged in, redirect to login page
+                window.location.href = 'login.html';
+            } else {
+                console.log('User is logged in:', user.email);
+            }
+        });
+
+        // Logout functionality
+        document.getElementById('logout-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            auth.signOut().then(function() {
+                window.location.href = 'login.html';
+            }).catch(function(error) {
+                console.error('Logout error:', error);
+            });
+        });
+    </script>
 </body>
 </html>
