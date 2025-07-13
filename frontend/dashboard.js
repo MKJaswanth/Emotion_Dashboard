@@ -96,25 +96,24 @@ const moodChart = new Chart(ctx, {
 // Initialize dashboard
 document.addEventListener('DOMContentLoaded', function() {
     checkAdminAuth();
-    setupTeamFilter();
     setupLogout();
-    updateLastUpdated();
 });
 
-// Check admin authentication
+// Check admin authentication using Firebase Auth
 function checkAdminAuth() {
-    const userRole = localStorage.getItem('userRole');
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    const auth = firebase.auth();
     
-    console.log('Dashboard auth check:', { userRole, isLoggedIn });
-    
-    if (userRole !== 'admin' || !isLoggedIn) {
-        console.log('Auth failed, redirecting to login...');
-        window.location.href = 'login.html';
-        return;
-    }
-    
-    console.log('Auth successful, dashboard access granted');
+    auth.onAuthStateChanged(function(user) {
+        if (!user) {
+            console.log('No user logged in, redirecting to login...');
+            window.location.href = 'login.html';
+            return;
+        }
+        
+        console.log('User authenticated:', user.email);
+        // Continue with dashboard initialization
+        initializeDashboard();
+    });
 }
 
 // Setup logout functionality
@@ -128,11 +127,23 @@ function setupLogout() {
     }
 }
 
-// Logout function
+// Logout function using Firebase Auth
 function logout() {
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('isLoggedIn');
-    window.location.href = 'index.html';
+    const auth = firebase.auth();
+    auth.signOut().then(function() {
+        console.log('User signed out successfully');
+        window.location.href = 'login.html';
+    }).catch(function(error) {
+        console.error('Logout error:', error);
+    });
+}
+
+// Initialize dashboard after authentication
+function initializeDashboard() {
+    setupTeamFilter();
+    updateLastUpdated();
+    // Start listening to Firebase data
+    startDataListeners();
 }
 
 // Setup team filter
@@ -151,30 +162,33 @@ function updateLastUpdated() {
     document.getElementById('last-updated').textContent = timeString;
 }
 
-// Listen to mood_entries in real-time
-db.ref("mood_entries").on("value", (snapshot) => {
-    allMoodEntries = [];
-    snapshot.forEach((child) => {
-        const entry = child.val();
-        allMoodEntries.push(entry);
-    });
-    updateDashboard();
-});
-
-// Listen to text_entries in real-time
-db.ref("text_entries").on("value", (snapshot) => {
-    allTextEntries = [];
-    snapshot.forEach((child) => {
-        const entry = child.val();
-        allTextEntries.push({
-            text: entry.text,
-            team: entry.team,
-            date: new Date(entry.timestamp).toLocaleString(),
-            timestamp: entry.timestamp
+// Start Firebase data listeners
+function startDataListeners() {
+    // Listen to mood_entries in real-time
+    db.ref("mood_entries").on("value", (snapshot) => {
+        allMoodEntries = [];
+        snapshot.forEach((child) => {
+            const entry = child.val();
+            allMoodEntries.push(entry);
         });
+        updateDashboard();
     });
-    updateDashboard();
-});
+
+    // Listen to text_entries in real-time
+    db.ref("text_entries").on("value", (snapshot) => {
+        allTextEntries = [];
+        snapshot.forEach((child) => {
+            const entry = child.val();
+            allTextEntries.push({
+                text: entry.text,
+                team: entry.team,
+                date: new Date(entry.timestamp).toLocaleString(),
+                timestamp: entry.timestamp
+            });
+        });
+        updateDashboard();
+    });
+}
 
 // Update dashboard based on selected team
 function updateDashboard() {

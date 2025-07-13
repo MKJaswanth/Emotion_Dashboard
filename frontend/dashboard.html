@@ -469,37 +469,5 @@
     </div>
 
     <script src="dashboard.js"></script>
-    
-    <script>
-        // Firebase config
-        var firebaseConfig = {
-            apiKey: "AIzaSyC639yfUtTgHbCmnqUp_J7uZ3RrFUbR5PU",
-            authDomain: "emotion-dashboard-d31ca.firebaseapp.com",
-            projectId: "emotion-dashboard-d31ca",
-            appId: "1:191620106192:web:68fe5b79d2ee42ecd71bd5"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-
-        // Check authentication state
-        auth.onAuthStateChanged(function(user) {
-            if (!user) {
-                // User is not logged in, redirect to login page
-                window.location.href = 'login.html';
-            } else {
-                console.log('User is logged in:', user.email);
-            }
-        });
-
-        // Logout functionality
-        document.getElementById('logout-btn').addEventListener('click', function(e) {
-            e.preventDefault();
-            auth.signOut().then(function() {
-                window.location.href = 'login.html';
-            }).catch(function(error) {
-                console.error('Logout error:', error);
-            });
-        });
-    </script>
 </body>
 </html>
