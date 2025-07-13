@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Emotion Analytics</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f8f9fa;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+    }
+    .sidebar {
+      width: 220px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      min-height: 100vh;
+      padding: 30px 0 0 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .sidebar h2 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 30px;
+    }
+    .nav-link {
+      color: white;
+      text-decoration: none;
+      padding: 12px 30px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      font-weight: 500;
+      display: block;
+      width: 100%;
+      text-align: left;
+      transition: background 0.2s;
+    }
+    .nav-link.active, .nav-link:hover {
+      background: rgba(255,255,255,0.12);
+    }
+    .main {
+      flex: 1;
+      padding: 40px;
+      background: #f8f9fa;
+      min-height: 100vh;
+    }
+    .section {
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+      padding: 32px 28px;
+      margin-bottom: 32px;
+    }
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #667eea;
+      margin-bottom: 18px;
+    }
+    .auth-warning {
+      color: #d63031;
+      background: #fff3f3;
+      border: 1px solid #ffd6d6;
+      padding: 18px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 1.1rem;
+      margin-bottom: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>Admin Panel</h2>
+    <a href="#teams" class="nav-link active">👥 Teams & Employees</a>
+    <a href="#reports" class="nav-link">📋 Reports</a>
+    <a href="#wellness" class="nav-link">🌱 Wellness Tips</a>
+    <a href="#settings" class="nav-link">⚙️ Settings</a>
+    <a href="#logout" class="nav-link" id="logout-link">🚪 Logout</a>
+  </div>
+  <div class="main">
+    <div id="auth-warning" class="auth-warning" style="display:none;">You must be logged in as an admin to view this dashboard.</div>
+    <div id="dashboard-content">
+      <div class="section" id="teams">
+        <div class="section-title">👥 Team & Employee Management</div>
+        <p>Manage teams, add/remove employees, assign roles, and link to organizations here. (Feature coming soon)</p>
+      </div>
+      <div class="section" id="reports">
+        <div class="section-title">📋 Reports</div>
+        <p>View and download organization/team reports. (Feature coming soon)</p>
+      </div>
+      <div class="section" id="wellness">
+        <div class="section-title">🌱 Wellness Tips & Goals</div>
+        <p>Set wellness goals, tips, and monitor progress. (Feature coming soon)</p>
+      </div>
+      <div class="section" id="settings">
+        <div class="section-title">⚙️ Organization Settings</div>
+        <p>Manage organization details, subscription, and admin users. (Feature coming soon)</p>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Firebase config (replace with your own project config)
+    var firebaseConfig = {
+      apiKey: "AIzaSyC639yfUtTgHbCmnqUp_J7uZ3RrFUbR5PU",
+      authDomain: "emotion-dashboard-d31ca.firebaseapp.com",
+      projectId: "emotion-dashboard-d31ca",
+      appId: "1:191620106192:web:68fe5b79d2ee42ecd71bd5"
+      
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Auth check
+    auth.onAuthStateChanged(function(user) {
+      if (!user) {
+        document.getElementById('auth-warning').style.display = 'block';
+        document.getElementById('dashboard-content').style.display = 'none';
+      } else {
+        document.getElementById('auth-warning').style.display = 'none';
+        document.getElementById('dashboard-content').style.display = 'block';
+      }
+    });
+
+    // Logout
+    document.getElementById('logout-link').onclick = function(e) {
+      e.preventDefault();
+      auth.signOut().then(function() {
+        window.location.href = 'login.html';
+      });
+    };
+  </script>
+</body>
+</html> 

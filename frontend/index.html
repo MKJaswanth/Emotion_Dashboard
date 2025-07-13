@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emotion Tracker - Your Daily Mood Companion</title>
+    <title>MoodFlow - Your Daily Emotional Wellness Companion</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -14,13 +14,11 @@
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-logo">🤖 Emotion Analytics</div>
+            <div class="nav-logo">💫 MoodFlow</div>
             <div class="nav-links" id="nav-links">
                 <a href="#welcome">Home</a>
                 <a href="#mood-section">Mood</a>
                 <a href="#text-section">Share</a>
-                <a href="#ai-insights">AI Insights</a>
-                <a href="#analytics">Analytics</a>
                 <a href="#quotes-section">Inspiration</a>
                 <a href="login.html" id="signin-link">Sign In</a>
                 <a href="dashboard.html" id="admin-link" style="display: none;">Dashboard</a>
@@ -40,12 +38,12 @@
     <section id="welcome" class="welcome-section">
         <div class="welcome-content">
             <div class="welcome-text">
-                <h1 class="welcome-title">AI-Powered Emotion Analytics 🤖</h1>
-                <p class="welcome-subtitle">Transform your emotional intelligence into actionable insights</p>
+                <h1 class="welcome-title">MoodFlow - Your Emotional Wellness Journey 💫</h1>
+                <p class="welcome-subtitle">Transform your daily moods into meaningful insights and growth</p>
                 <p class="welcome-description">
-                    Track your daily moods with AI-powered sentiment analysis, get personalized insights, 
-                    and discover patterns that help you understand yourself better. 
-                    Join thousands of users improving their emotional wellness!
+                    Flow through your emotions with gentle guidance and AI-powered insights. 
+                    Discover patterns, celebrate growth, and nurture your emotional well-being. 
+                    Join a community of mindful individuals on their wellness journey!
                 </p>
                 <div class="cta-buttons">
                     <button class="cta-button primary" id="start-journey-btn">
@@ -55,20 +53,7 @@
                         View Demo 🚀
                     </button>
                 </div>
-                <div class="feature-highlights">
-                    <div class="feature-item">
-                        <span class="feature-icon">🧠</span>
-                        <span>AI Sentiment Analysis</span>
-                    </div>
-                    <div class="feature-item">
-                        <span class="feature-icon">📊</span>
-                        <span>Real-time Analytics</span>
-                    </div>
-                    <div class="feature-item">
-                        <span class="feature-icon">🎯</span>
-                        <span>Predictive Insights</span>
-                    </div>
-                </div>
+
             </div>
             <div class="welcome-illustration">
                 <div class="floating-emoji">🤖</div>
@@ -76,10 +61,7 @@
                 <div class="floating-emoji">💡</div>
             </div>
         </div>
-        <div class="scroll-indicator">
-            <div class="scroll-arrow">↓</div>
-            <p>Scroll to explore</p>
-        </div>
+
     </section>
 
     <!-- Mood Selection Section -->
@@ -155,130 +137,7 @@
         </div>
     </section>
 
-    <!-- AI Insights Section -->
-    <section id="ai-insights" class="ai-insights-section">
-        <div class="container">
-            <h2 class="section-title">🤖 AI-Powered Insights</h2>
-            <p class="section-subtitle">Get instant analysis of your emotional patterns</p>
-            
-            <div class="insights-grid">
-                <div class="insight-card">
-                    <div class="insight-icon">🧠</div>
-                    <h3>Sentiment Analysis</h3>
-                    <p>Our AI analyzes your text to understand your emotional state</p>
-                    <div class="insight-result" id="sentiment-result">
-                        <span class="result-label">Your sentiment:</span>
-                        <span class="result-value" id="sentiment-value">-</span>
-                    </div>
-                </div>
-                
-                <div class="insight-card">
-                    <div class="insight-icon">😊</div>
-                    <h3>Emotion Detection</h3>
-                    <p>Identify specific emotions in your writing</p>
-                    <div class="insight-result" id="emotion-result">
-                        <span class="result-label">Primary emotion:</span>
-                        <span class="result-value" id="emotion-value">-</span>
-                    </div>
-                </div>
-                
-                <div class="insight-card">
-                    <div class="insight-icon">📈</div>
-                    <h3>Mood Trends</h3>
-                    <p>Track your mood patterns over time</p>
-                    <div class="insight-result" id="trend-result">
-                        <span class="result-label">This week:</span>
-                        <span class="result-value" id="trend-value">-</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="ai-actions">
-                <button id="analyze-text" class="analyze-button">
-                    🔍 Analyze My Text
-                </button>
-                <button id="view-full-analysis" class="secondary-button" onclick="window.open('advanced-analytics.html', '_blank')">
-                    View Full Analysis 📊
-                </button>
-            </div>
-        </div>
-    </section>
 
-    <!-- Analytics Section -->
-    <section id="analytics" class="analytics-section">
-        <div class="container">
-            <h2 class="section-title">📊 Your Personal Analytics</h2>
-            <p class="section-subtitle">Real-time insights into your emotional journey</p>
-            
-            <div class="analytics-grid">
-                <div class="analytics-card">
-                    <div class="analytics-header">
-                        <h3>Mood Distribution</h3>
-                        <span class="analytics-icon">📊</span>
-                    </div>
-                    <div class="analytics-content">
-                        <div class="mood-chart" id="mood-chart">
-                            <div class="chart-bar" data-mood="1" style="height: 10%"></div>
-                            <div class="chart-bar" data-mood="2" style="height: 15%"></div>
-                            <div class="chart-bar" data-mood="3" style="height: 25%"></div>
-                            <div class="chart-bar" data-mood="4" style="height: 35%"></div>
-                            <div class="chart-bar" data-mood="5" style="height: 15%"></div>
-                        </div>
-                        <div class="chart-labels">
-                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="analytics-card">
-                    <div class="analytics-header">
-                        <h3>Weekly Summary</h3>
-                        <span class="analytics-icon">📅</span>
-                    </div>
-                    <div class="analytics-content">
-                        <div class="summary-stats">
-                            <div class="stat-item">
-                                <span class="stat-number" id="total-entries">0</span>
-                                <span class="stat-label">Total Entries</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-number" id="avg-mood">0</span>
-                                <span class="stat-label">Avg. Mood</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-number" id="streak-days">0</span>
-                                <span class="stat-label">Day Streak</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="analytics-card">
-                    <div class="analytics-header">
-                        <h3>AI Recommendations</h3>
-                        <span class="analytics-icon">💡</span>
-                    </div>
-                    <div class="analytics-content">
-                        <div class="recommendations" id="ai-recommendations">
-                            <div class="recommendation-item">
-                                <span class="rec-icon">🌟</span>
-                                <span class="rec-text">Start tracking your mood daily for better insights</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="analytics-actions">
-                <button class="primary-button" onclick="window.open('dashboard.html', '_blank')">
-                    View Full Dashboard 📈
-                </button>
-                <button class="secondary-button" onclick="window.open('enterprise-dashboard.html', '_blank')">
-                    Enterprise Features 🏢
-                </button>
-            </div>
-        </div>
-    </section>
 
     <!-- Quotes Section -->
     <section id="quotes-section" class="quotes-section">
@@ -313,8 +172,8 @@
                 <div class="footer-section">
                     <h4>Features</h4>
                     <ul>
-                        <li><a href="#ai-insights">AI Insights</a></li>
-                        <li><a href="#analytics">Analytics</a></li>
+                        <li><a href="advanced-analytics.html">AI Insights</a></li>
+                        <li><a href="advanced-analytics.html">Analytics</a></li>
                         <li><a href="advanced-analytics.html">Advanced Features</a></li>
                         <li><a href="enterprise-dashboard.html">Enterprise</a></li>
                     </ul>
@@ -337,6 +196,7 @@
             </div>
             <div class="footer-bottom">
                 <p>&copy; 2025 Emotion Analytics. Made with ❤️ for better mental health and team performance.</p>
+                <p class="creator-credit">Created by <strong>Jaswanth</strong> 💫</p>
             </div>
         </div>
     </footer>

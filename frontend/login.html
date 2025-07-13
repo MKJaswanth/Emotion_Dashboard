@@ -1,447 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Emotion Tracker</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <style>
-        .login-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #000000 0%, #0a0a0a 50%, #1a1a1a 100%);
-            padding: 20px;
-            position: relative;
-        }
-        
-        .login-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.1) 0%, transparent 50%);
-            z-index: -2;
-            animation: weatherShift 20s ease-in-out infinite;
-        }
-        
-        @keyframes weatherShift {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.6; }
-        }
-        
-        .login-card {
-            background: rgba(0, 0, 0, 0.9);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            max-width: 400px;
-            width: 100%;
-            text-align: center;
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(120, 211, 255, 0.1);
-        }
-        
-        .login-logo {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-        
-        .login-title {
-            font-size: 1.8rem;
-            font-weight: 600;
-            color: #78d3ff;
-            margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(120, 211, 255, 0.3);
-            font-family: 'Playfair Display', serif;
-        }
-        
-        .login-subtitle {
-            color: #d1d5db;
-            margin-bottom: 30px;
-            font-family: 'Inter', sans-serif;
-        }
-        
-        .login-form {
-            margin-bottom: 30px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-        
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #d1d5db;
-            font-family: 'Inter', sans-serif;
-        }
-        
-        .form-input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid rgba(120, 211, 255, 0.2);
-            border-radius: 10px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            box-sizing: border-box;
-            background: rgba(0, 0, 0, 0.8);
-            color: #f5f5f5;
-            font-family: 'Inter', sans-serif;
-        }
-        
-        .form-input:focus {
-            outline: none;
-            border-color: #78d3ff;
-            box-shadow: 0 0 20px rgba(120, 211, 255, 0.2);
-            background: rgba(0, 0, 0, 0.9);
-        }
-        
-        .form-input::placeholder {
-            color: #9ca3af;
-        }
-        
-        .login-button {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #78d3ff 0%, #ff77c6 100%);
-            color: #000000;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(120, 211, 255, 0.2);
-            font-family: 'Inter', sans-serif;
-        }
-        
-        .login-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(120, 211, 255, 0.3);
-        }
-        
-        .divider {
-            margin: 30px 0;
-            display: flex;
-            align-items: center;
-            color: #9ca3af;
-        }
-        
-        .divider::before,
-        .divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: rgba(120, 211, 255, 0.2);
-        }
-        
-        .divider span {
-            padding: 0 15px;
-        }
-        
-        .google-button {
-            width: 100%;
-            padding: 14px;
-            background: rgba(0, 0, 0, 0.8);
-            color: #f5f5f5;
-            border: 2px solid rgba(120, 211, 255, 0.2);
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            font-family: 'Inter', sans-serif;
-        }
-        
-        .google-button:hover {
-            border-color: #78d3ff;
-            background: rgba(0, 0, 0, 0.9);
-            box-shadow: 0 0 20px rgba(120, 211, 255, 0.2);
-        }
-        
-        .google-icon {
-            width: 20px;
-            height: 20px;
-        }
-        
-        .demo-info {
-            background: rgba(0, 0, 0, 0.8);
-            border: 1px solid rgba(120, 211, 255, 0.2);
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 20px;
-            font-size: 14px;
-            color: #9ca3af;
-            font-family: 'Inter', sans-serif;
-        }
-        
-        .demo-info strong {
-            color: #78d3ff;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Emotion Analytics</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .auth-container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+      padding: 40px 32px;
+      width: 100%;
+      max-width: 370px;
+      text-align: center;
+    }
+    .auth-title {
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 18px;
+      color: #667eea;
+    }
+    .auth-input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 16px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    .auth-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .auth-btn:hover {
+      background: linear-gradient(135deg, #5a6fd8 0%, #5e3e8c 100%);
+    }
+    .google-btn {
+      background: #fff;
+      color: #333;
+      border: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .switch-link {
+      color: #764ba2;
+      cursor: pointer;
+      font-size: 0.95rem;
+      margin-top: 8px;
+      display: inline-block;
+    }
+    .error-msg {
+      color: #d63031;
+      font-size: 0.95rem;
+      margin-bottom: 10px;
+    }
+  </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-card">
-            <div class="login-logo">😊</div>
-            <h1 class="login-title">Welcome Back</h1>
-            <p class="login-subtitle">Sign in to access your emotion tracker</p>
-            
-            <!-- Admin Login Form -->
-            <form class="login-form" id="admin-form">
-                <div class="form-group">
-                    <label class="form-label" for="username">Username</label>
-                    <input type="text" id="username" class="form-input" placeholder="Enter username" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="password">Password</label>
-                    <input type="password" id="password" class="form-input" placeholder="Enter password" required>
-                </div>
-                <button type="submit" class="login-button">Admin Login</button>
-            </form>
-            
-            <div class="divider">
-                <span>or</span>
-            </div>
-            
-            <!-- Google Login -->
-            <button class="google-button" id="google-login">
-                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAxOCAxOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE3LjY0IDkuMjA0NTVDMTcuNjQgOC41NjY0IDE3LjU4MjcgNy45NTI3MyAxNy40NzI3IDcuMzYzNjRIMTlWMTBIMTcuNjRWOS4yMDQ1NVoiIGZpbGw9IiNGQjQwMjgiLz4KPHBhdGggZD0iTTkgMTcuNjRDMTAuNDc2NCAxNy42NCAxMS43NzI3IDE3LjE0NTUgMTIuNzI3MyAxNi4yNzI3TDE1LjQ1NDUgMTguMTgxOEMxNC4wMDkxIDE5LjQ5MDkgMTIuMDkwOSAyMC4yNCA5IDIwLjI0QzYuNjM2MzYgMjAuMjQgNC42MzYzNiAxOS4xNDU1IDMuMzE4MTggMTcuMzYzNkwxLjA5MDkxIDE5LjE4MThDMS42MzYzNiAyMC4wOTA5IDIuNDU0NTUgMjAuNzI3MyAzLjQ1NDU1IDIxLjE4MThDNC40NTQ1NSAyMS42MzY0IDUuNjM2MzYgMjEuODcyNyA2LjkwOTA5IDIxLjg3MjdDMTIuMDkwOSAyMS44NzI3IDE2LjE4MTggMTguNzI3MyAxNi4xODE4IDEzLjYzNjRIMTQuNzI3M0MxNC43MjczIDE2LjE4MTggMTIuNzI3MyAxNy42NCA5IDE3LjY0WiIgZmlsbD0iIzM0QTg1MyIvPgo8cGF0aCBkPSJNMy4zMTgxOCAxNy4zNjM2QzMuMDkwOTEgMTYuNzI3MyAyLjk1NDU1IDE2LjA5MDkgMi45NTQ1NSAxNS40NTQ1QzIuOTU0NTUgMTQuODE4MiAzLjA5MDkxIDE0LjE4MTggMy4zMTgxOCAxMy41NDU1VjExLjcyNzNIMC45MDkwOTFDMC4zMjcyNzMgMTMuMDkwOSAwIDE0LjYzNjQgMCAxNi4yNzI3QzAgMTcuOTA5MSAwLjMyNzI3MyAxOS40NTQ1IDAuOTA5MDkxIDIwLjgxODJMMy4zMTgxOCAxNy4zNjM2WiIgZmlsbD0iI0ZCQjAwRCIvPgo8cGF0aCBkPSJNOSAzLjI3MjczQzEwLjA5MDkgMy4yNzI3MyAxMS4wOTA5IDMuNjM2MzYgMTEuODE4MiA0LjM2MzY0TDEzLjgxODE4IDIuMzYzNjRDMTIuNzI3MyAxLjI3MjczIDExLjQ1NDUgMC42MzYzNjQgOS45MDkwOSAwLjYzNjM2NEM3LjU0NTQ1IDAuNjM2MzY0IDUuNTQ1NDUgMS43MzE4MiA0LjIyNzI3IDMuNTEzNjRMMi4wMDAwMSAxLjczMTgyQzIuNTQ1NDUgMC44MTgxODIgMy4zNjM2NCAwLjA5MDkwOSA0LjM2MzY0IC0wLjM2MzYzNkM1LjM2MzY0IC0wLjgxODE4MiA2LjU0NTQ1IC0xLjA1NDU1IDcuODE4MTggLTEuMDU0NTVDMTMuMDA5MSAtMS4wNTQ1NSAxNy4wOTA5IDIuMDkwOTEgMTcuMDkwOSA3LjE4MTgySDE1LjYzNjRDMTUuNjM2NCA0LjYzNjM2IDEzLjYzNjQgMy4xODE4MiAxMC45MDkwOSAzLjE4MTgySDlWMy4yNzI3M1oiIGZpbGw9IiNFQTQzMzUiLz4KPC9zdmc+" alt="Google" class="google-icon">
-                Continue with Google
-            </button>
-            
-            <div class="demo-info" style="margin-top: 10px;">
-                <strong>Demo Access:</strong><br>
-                <button class="google-button" id="demo-login" style="margin-top: 5px;">
-                    🚀 Try Demo Login
-                </button>
-            </div>
-        </div>
-    </div>
+  <div class="auth-container">
+    <div class="auth-title" id="form-title">Sign In</div>
+    <div class="error-msg" id="error-msg"></div>
+    <input type="email" id="email" class="auth-input" placeholder="Email" autocomplete="username">
+    <input type="password" id="password" class="auth-input" placeholder="Password" autocomplete="current-password">
+    <button class="auth-btn" id="auth-action">Sign In</button>
+    <button class="auth-btn google-btn" id="google-signin"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">Sign in with Google</button>
+    <div class="switch-link" id="switch-link">Don't have an account? Sign Up</div>
+  </div>
+  <script>
+    // Firebase config (replace with your own project config)
+    var firebaseConfig = {
+      apiKey: "AIzaSyC639yfUtTgHbCmnqUp_J7uZ3RrFUbR5PU",
+      authDomain: "emotion-dashboard-d31ca.firebaseapp.com",
+      projectId: "emotion-dashboard-d31ca",
+      appId: "1:191620106192:web:68fe5b79d2ee42ecd71bd5"
+      
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
 
-    <script>
-        // Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyC639yfUtTgHbCmnqUp_J7uZ3RrFUbR5PU",
-            authDomain: "emotion-dashboard-d31ca.firebaseapp.com",
-            databaseURL: "https://emotion-dashboard-d31ca-default-rtdb.firebaseio.com",
-            projectId: "emotion-dashboard-d31ca",
-            storageBucket: "emotion-dashboard-d31ca.firebasestorage.app",
-            messagingSenderId: "191620106192",
-            appId: "1:191620106192:web:68fe5b79d2ee42ecd71bd5",
-            measurementId: "G-6DJ6ZF946J"
-        };
+    let isSignUp = false;
+    const formTitle = document.getElementById('form-title');
+    const authAction = document.getElementById('auth-action');
+    const switchLink = document.getElementById('switch-link');
+    const errorMsg = document.getElementById('error-msg');
 
-        // Check environment compatibility
-        function checkEnvironment() {
-            const issues = [];
-            
-            // Check protocol
-            if (!['http:', 'https:', 'chrome-extension:'].includes(location.protocol)) {
-                issues.push('Unsupported protocol: ' + location.protocol);
-            }
-            
-            // Check if localStorage is available
-            try {
-                localStorage.setItem('test', 'test');
-                localStorage.removeItem('test');
-            } catch (e) {
-                issues.push('Web storage is disabled or not available');
-            }
-            
-            // Check if we're in an iframe
-            if (window !== window.top) {
-                issues.push('Application is running in an iframe');
-            }
-            
-            return issues;
+    switchLink.onclick = () => {
+      isSignUp = !isSignUp;
+      formTitle.textContent = isSignUp ? 'Sign Up' : 'Sign In';
+      authAction.textContent = isSignUp ? 'Sign Up' : 'Sign In';
+      switchLink.textContent = isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up";
+      errorMsg.textContent = '';
+    };
+
+    authAction.onclick = async () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      errorMsg.textContent = '';
+      try {
+        if (isSignUp) {
+          await auth.createUserWithEmailAndPassword(email, password);
+        } else {
+          await auth.signInWithEmailAndPassword(email, password);
         }
+        window.location.href = 'dashboard.html';
+      } catch (e) {
+        errorMsg.textContent = e.message;
+      }
+    };
 
-        // Initialize Firebase with error handling
-        let auth, db;
-        try {
-            firebase.initializeApp(firebaseConfig);
-            auth = firebase.auth();
-            db = firebase.database();
-            
-            // Set persistence to LOCAL for better compatibility
-            auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-            
-            console.log('Firebase initialized successfully');
-        } catch (error) {
-            console.error('Firebase initialization failed:', error);
-            alert('Authentication service is currently unavailable. Please try again later.');
-        }
-
-        // Admin credentials
-        const ADMIN_CREDENTIALS = {
-            username: 'admin',
-            password: 'admin123'
-        };
-
-        // Check if user is already logged in
-        if (auth) {
-            auth.onAuthStateChanged(function(user) {
-                if (user && !localStorage.getItem('userRole')) {
-                    // User is signed in via Google but no role set yet
-                    localStorage.setItem('userRole', 'user');
-                    localStorage.setItem('isLoggedIn', 'true');
-                    redirectBasedOnRole();
-                }
-            });
-        }
-
-        // Function to redirect based on user role
-        function redirectBasedOnRole() {
-            const userRole = localStorage.getItem('userRole');
-            if (userRole === 'admin') {
-                window.location.href = 'dashboard.html';
-            } else {
-                window.location.href = 'index.html';
-            }
-        }
-
-        // Admin login
-        document.getElementById('admin-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
-                localStorage.setItem('userRole', 'admin');
-                localStorage.setItem('isLoggedIn', 'true');
-                window.location.href = 'dashboard.html';
-            } else {
-                alert('Invalid admin credentials!');
-            }
-        });
-
-        // Google login with better error handling
-        document.getElementById('google-login').addEventListener('click', function() {
-            const button = this;
-            const originalText = button.innerHTML;
-            
-            // Check environment first
-            const environmentIssues = checkEnvironment();
-            if (environmentIssues.length > 0) {
-                alert('Environment issues detected:\n' + environmentIssues.join('\n') + '\n\nPlease ensure you are accessing this site via HTTP/HTTPS and have web storage enabled.');
-                return;
-            }
-            
-            // Check if Firebase is initialized
-            if (!auth) {
-                alert('Authentication service is not available. Please refresh the page and try again.');
-                return;
-            }
-            
-            // Show loading state
-            button.innerHTML = '<div style="display: inline-block; width: 20px; height: 20px; border: 2px solid #f5f5f5; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite;"></div> Signing in...';
-            button.disabled = true;
-            
-            try {
-                const provider = new firebase.auth.GoogleAuthProvider();
-                provider.addScope('email');
-                provider.addScope('profile');
-                
-                // Try popup first
-                auth.signInWithPopup(provider)
-                    .then((result) => {
-                        console.log('Google sign-in successful:', result.user.email);
-                        localStorage.setItem('userRole', 'user');
-                        localStorage.setItem('isLoggedIn', 'true');
-                        localStorage.setItem('userEmail', result.user.email);
-                        redirectBasedOnRole();
-                    })
-                    .catch((error) => {
-                        console.error('Google login error:', error);
-                        
-                        let errorMessage = 'Google login failed. Please try again.';
-                        
-                        switch (error.code) {
-                            case 'auth/popup-closed-by-user':
-                                errorMessage = 'Login was cancelled. Please try again.';
-                                break;
-                            case 'auth/popup-blocked':
-                                errorMessage = 'Popup was blocked. Please allow popups for this site and try again.';
-                                break;
-                            case 'auth/network-request-failed':
-                                errorMessage = 'Network error. Please check your internet connection.';
-                                break;
-                            case 'auth/account-exists-with-different-credential':
-                                errorMessage = 'An account already exists with this email using a different sign-in method.';
-                                break;
-                            case 'auth/operation-not-supported-in-this-environment':
-                                errorMessage = 'Google login is not supported in this environment. Please use admin login or demo login.';
-                                break;
-                            case 'auth/configuration-not-found':
-                                errorMessage = 'Google Authentication is not configured for this project. Please use admin login or demo login.';
-                                break;
-                            default:
-                                if (error.message && error.message.includes('CONFIGURATION_NOT_FOUND')) {
-                                    errorMessage = 'Google Authentication is not configured for this project. Please use admin login or demo login.';
-                                } else {
-                                    errorMessage = `Login failed: ${error.message}`;
-                                }
-                        }
-                        
-                        alert(errorMessage);
-                        
-                        // Reset button
-                        button.innerHTML = originalText;
-                        button.disabled = false;
-                    });
-            } catch (error) {
-                console.error('Google provider creation error:', error);
-                alert('Failed to initialize Google login. Please use admin login or demo login.');
-                button.innerHTML = originalText;
-                button.disabled = false;
-            }
-        });
-
-        // Demo login (fallback when Firebase is not available)
-        document.getElementById('demo-login').addEventListener('click', function() {
-            const button = this;
-            const originalText = button.innerHTML;
-            
-            button.innerHTML = '<div style="display: inline-block; width: 20px; height: 20px; border: 2px solid #f5f5f5; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite;"></div> Logging in...';
-            button.disabled = true;
-            
-            // Simulate login delay
-            setTimeout(() => {
-                localStorage.setItem('userRole', 'user');
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('userEmail', 'demo@example.com');
-                redirectBasedOnRole();
-            }, 1000);
-        });
-
-        // Add CSS for loading spinner
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-            }
-        `;
-        document.head.appendChild(style);
-    </script>
+    document.getElementById('google-signin').onclick = async () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      try {
+        await auth.signInWithPopup(provider);
+        window.location.href = 'dashboard.html';
+      } catch (e) {
+        errorMsg.textContent = e.message;
+      }
+    };
+  </script>
 </body>
 </html> 
