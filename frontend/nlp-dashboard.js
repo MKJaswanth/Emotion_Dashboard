@@ -27,15 +27,17 @@ document.addEventListener('DOMContentLoaded', function() {
     loadTextEntries();
 });
 
-// Check admin authentication
+// Replace checkAdminAuth with Firebase Auth version
 function checkAdminAuth() {
-    const userRole = localStorage.getItem('userRole');
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
-    
-    if (userRole !== 'admin' || !isLoggedIn) {
-        window.location.href = 'login.html';
-        return;
-    }
+    const auth = firebase.auth();
+    auth.onAuthStateChanged(function(user) {
+        if (!user) {
+            // Redirect to login with redirect param
+            window.location.href = 'login.html?redirect=nlp-dashboard.html';
+            return;
+        }
+        // User is authenticated, continue as normal
+    });
 }
 
 // Setup logout functionality
@@ -49,11 +51,14 @@ function setupLogout() {
     }
 }
 
-// Logout function
+// Replace logout function with Firebase Auth version
 function logout() {
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('isLoggedIn');
-    window.location.href = 'index.html';
+    const auth = firebase.auth();
+    auth.signOut().then(function() {
+        window.location.href = 'index.html';
+    }).catch(function(error) {
+        console.error('Logout error:', error);
+    });
 }
 
 // Setup team filter

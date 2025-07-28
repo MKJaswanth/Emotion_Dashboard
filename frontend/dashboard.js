@@ -106,7 +106,7 @@ function checkAdminAuth() {
     auth.onAuthStateChanged(function(user) {
         if (!user) {
             console.log('No user logged in, redirecting to login...');
-            window.location.href = 'login.html';
+            window.location.href = 'login.html?redirect=dashboard.html';
             return;
         }
         

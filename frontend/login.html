@@ -114,6 +114,11 @@
       errorMsg.textContent = '';
     };
 
+    function getRedirectParam() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('redirect');
+    }
+
     authAction.onclick = async () => {
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
@@ -124,7 +129,12 @@
         } else {
           await auth.signInWithEmailAndPassword(email, password);
         }
-        window.location.href = 'dashboard.html';
+        const redirect = getRedirectParam();
+        if (redirect) {
+          window.location.href = redirect;
+        } else {
+          window.location.href = 'dashboard.html';
+        }
       } catch (e) {
         errorMsg.textContent = e.message;
       }
@@ -134,7 +144,12 @@
       const provider = new firebase.auth.GoogleAuthProvider();
       try {
         await auth.signInWithPopup(provider);
-        window.location.href = 'dashboard.html';
+        const redirect = getRedirectParam();
+        if (redirect) {
+          window.location.href = redirect;
+        } else {
+          window.location.href = 'dashboard.html';
+        }
       } catch (e) {
         errorMsg.textContent = e.message;
       }
